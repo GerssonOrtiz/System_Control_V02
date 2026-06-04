@@ -6,7 +6,7 @@ import { useUser } from '@/hooks/useUser'
 import { toast } from 'sonner'
 
 export default function AdminUsuariosPage() {
-  const { role } = useUser()
+  const { role, loading: userLoading } = useUser()
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [assigningRoles, setAssigningRoles] = useState<Record<string, string>>({})
@@ -37,6 +37,14 @@ export default function AdminUsuariosPage() {
       fetchUsers()
     }
   }, [role])
+
+  if (userLoading) {
+    return (
+      <div className="text-center py-12 text-sm text-neon-blue font-mono tracking-widest animate-pulse">
+        CONECTANDO CON SERVIDOR DE CREDENCIALES...
+      </div>
+    )
+  }
 
   if (role !== 'superadmin') {
     return (
