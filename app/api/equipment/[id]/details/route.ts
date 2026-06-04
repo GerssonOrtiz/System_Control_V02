@@ -5,9 +5,10 @@ import { WorkflowEngine } from '@/lib/workflow/engine'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: equipmentId } = await params
     const supabase = await createServerClient()
 
     // 1. Verificar sesión
@@ -28,8 +29,6 @@ export async function GET(
     if (!activeProfile?.is_active) {
       return NextResponse.json({ success: false, error: 'Cuenta no activa' }, { status: 403 })
     }
-
-    const { id: equipmentId } = params
 
     // 3. Buscar el detalle del equipo
     const { data: equipment, error: eqError } = await supabase

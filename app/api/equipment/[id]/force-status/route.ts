@@ -5,9 +5,10 @@ import { forceStatusSchema } from '@/lib/validations/equipment.schema'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: equipmentId } = await params
     // 1. Crear el cliente normal para verificar sesión y rol RLS
     const normalSupabase = await createServerClient()
 
@@ -38,8 +39,6 @@ export async function POST(
     if (activeProfile.role !== 'superadmin' || !activeProfile.is_superadmin) {
       return NextResponse.json({ success: false, error: 'Acceso denegado. Solo el superadmin puede forzar estados' }, { status: 403 })
     }
-
-    const { id: equipmentId } = params
 
     // 5. Validar body con Zod
     const body = await request.json()

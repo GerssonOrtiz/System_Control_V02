@@ -28,16 +28,17 @@ async function checkSuperadmin(supabase: any) {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createServerClient()
     const check = await checkSuperadmin(supabase)
     if (check.error) {
       return NextResponse.json({ success: false, error: check.error }, { status: check.status })
     }
 
-    const transitionId = parseInt(params.id, 10)
+    const transitionId = parseInt(id, 10)
     if (isNaN(transitionId)) {
       return NextResponse.json({ success: false, error: 'ID de transición inválido' }, { status: 400 })
     }

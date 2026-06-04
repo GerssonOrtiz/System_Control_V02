@@ -4,9 +4,10 @@ import { createServerClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: targetUserId } = await params
     const supabase = await createServerClient()
 
     // 1. Verificar sesión
@@ -30,8 +31,6 @@ export async function POST(
     if (activeProfile.role !== 'superadmin' || !activeProfile.is_superadmin) {
       return NextResponse.json({ success: false, error: 'Acceso denegado. Solo el superadmin puede bloquear usuarios' }, { status: 403 })
     }
-
-    const { id: targetUserId } = params
 
     // Prevent blocking oneself
     if (targetUserId === session.user.id) {

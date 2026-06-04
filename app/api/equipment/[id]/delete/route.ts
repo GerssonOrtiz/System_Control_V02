@@ -4,9 +4,10 @@ import { createServerClient } from '@/lib/supabase/server'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createServerClient()
 
     // 1. Verificar sesión
@@ -34,7 +35,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'No cuentas con permisos para eliminar equipos' }, { status: 403 })
     }
 
-    const { id: equipmentId } = params
+    const equipmentId = id
 
     // 4. Verificar si el equipo existe antes de borrar
     const { data: equipment } = await supabase

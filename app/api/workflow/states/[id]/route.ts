@@ -29,16 +29,17 @@ async function checkSuperadmin(supabase: any) {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createServerClient()
     const check = await checkSuperadmin(supabase)
     if (check.error) {
       return NextResponse.json({ success: false, error: check.error }, { status: check.status })
     }
 
-    const stateId = parseInt(params.id, 10)
+    const stateId = parseInt(id, 10)
     if (isNaN(stateId)) {
       return NextResponse.json({ success: false, error: 'ID de estado inválido' }, { status: 400 })
     }
@@ -105,16 +106,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createServerClient()
     const check = await checkSuperadmin(supabase)
     if (check.error) {
       return NextResponse.json({ success: false, error: check.error }, { status: check.status })
     }
 
-    const stateId = parseInt(params.id, 10)
+    const stateId = parseInt(id, 10)
     if (isNaN(stateId)) {
       return NextResponse.json({ success: false, error: 'ID de estado inválido' }, { status: 400 })
     }

@@ -6,9 +6,10 @@ import { WorkflowEngine } from '@/lib/workflow/engine'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: equipmentId } = await params
     const supabase = await createServerClient()
 
     // 1. Verificar sesión
@@ -29,8 +30,6 @@ export async function POST(
     if (!activeProfile?.is_active) {
       return NextResponse.json({ success: false, error: 'Cuenta no activa' }, { status: 403 })
     }
-
-    const { id: equipmentId } = params
 
     // 3. Validar body con Zod
     const body = await request.json()
