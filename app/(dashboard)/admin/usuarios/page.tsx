@@ -11,6 +11,8 @@ export default function AdminUsuariosPage() {
   const [loading, setLoading] = useState(true)
   const [assigningRoles, setAssigningRoles] = useState<Record<string, string>>({})
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importResults, setImportResults] = useState<any | null>(null)
 
   // Roles válidos para asignar (excluyendo superadmin)
   const validRoles = ['admin', 'operaciones', 'recepcion', 'almacen', 'visualizador']
@@ -164,9 +166,6 @@ export default function AdminUsuariosPage() {
       toast.error('Error de red al eliminar usuario')
     }
   }
-
-  const [importing, setImporting] = useState(false)
-  const [importResults, setImportResults] = useState<any | null>(null)
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
