@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer()
-    const workbook = XLSX.read(bytes, { type: 'array' })
+    const workbook = XLSX.read(bytes, { type: 'array', cellDates: true })
     const sheetName = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[sheetName]
 
@@ -52,15 +52,62 @@ export async function POST(request: NextRequest) {
     let skippedCount = 0
     const errorsList: Array<{ row: number; fr: string | null; reason: string }> = []
 
-    // Obtener estado inicial del workflow
-    const { data: initialState, error: stateError } = await supabase
+    // Obtener todos los estados del workflow para mapeo dinámico
+    const { data: allWorkflowStates, error: stateError } = await supabase
       .from('workflow_states')
-      .select('id')
-      .eq('is_initial', true)
-      .single() as any
+      .select('id, name, is_initial') as any
 
-    if (stateError || !initialState) {
-      return NextResponse.json({ success: false, error: 'No se pudo determinar el estado inicial del workflow' }, { status: 500 })
+    if (stateError || !allWorkflowStates || allWorkflowStates.length === 0) {
+      return NextResponse.json({ success: false, error: 'No se pudieron consultar los estados del workflow' }, { status: 500 })
+    }
+
+    const initialState = allWorkflowStates.find((s: any) => s.is_initial)
+    if (!initialState) {
+      return NextResponse.json({ success: false, error: 'No se encontró un estado inicial del workflow' }, { status: 500 })
+    }
+
+    const statesMap = new Map<string, number>()
+    for (const st of allWorkflowStates) {
+      statesMap.set(st.name.trim().toUpperCase(), st.id)
+    }
+
+    const parseExcelDate = (val: any): string | null => {
+      if (!val) return null
+      if (val instanceof Date) {
+        return val.toISOString()
+      }
+      if (typeof val === 'number') {
+        const date = new Date((val - 25569) * 86400 * 1000)
+        return date.toISOString()
+      }
+      const str = val.toString().trim()
+      if (!str) return null
+
+      const parts = str.split(/[-\/]/)
+      if (parts.length === 3) {
+        let day = parseInt(parts[0], 10)
+        let month = parseInt(parts[1], 10) - 1
+        let year = parseInt(parts[2], 10)
+        if (year < 100) year += 2000
+
+        if (parts[0].length === 4) {
+          year = parseInt(parts[0], 10)
+          month = parseInt(parts[1], 10) - 1
+          day = parseInt(parts[2], 10)
+        }
+
+        const date = new Date(year, month, day)
+        if (!isNaN(date.getTime())) {
+          return date.toISOString()
+        }
+      }
+
+      const parsed = new Date(str)
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString()
+      }
+
+      return null
     }
 
     // Carga masiva de FRs existentes para verificación en memoria
@@ -132,8 +179,15 @@ export async function POST(request: NextRequest) {
         'CONDICION', 'Condición Ingreso', 'CONDICIÓN', 'condition_in', 'condicion_ingreso', 'CONDICION INGRESO'
       )
 
-      // ESTADO: se ignora — siempre se asigna el estado inicial del workflow
-      // FECHA DE INGRESO: se ignora — se usa la fecha actual (default de la BD)
+      // ESTADO: Buscar coincidencia con la base de datos
+      const stateRaw = readField(row,
+        'ESTADO', 'Estado', 'estado', 'status', 'status_name'
+      ).trim().toUpperCase()
+      const currentStatusId = statesMap.get(stateRaw) || initialState.id
+
+      // FECHA DE INGRESO: Leer e interpretar la fecha de ingreso
+      const dateInRaw = row['FECHA DE INGRESO'] || row['Fecha de Ingreso'] || row['Fecha Ingreso'] || row['fecha_ingreso'] || row['DATE_IN'] || row['date_in']
+      const dateInValue = parseExcelDate(dateInRaw) || new Date().toISOString()
 
       // ─── Validación mínima ─────────────────────────────────────────────────
       if (!clientNameValue) {
@@ -182,7 +236,8 @@ export async function POST(request: NextRequest) {
         accessories:             accessoriesValue   !== '' ? accessoriesValue.toUpperCase()   : '--',
         condition_in:            conditionValue     !== '' ? conditionValue.toUpperCase()     : '--',
         additional_observations: null,
-        current_status_id:       initialState.id,
+        current_status_id:       currentStatusId,
+        date_in:                 dateInValue,
         created_by:              user.id,
       })
 

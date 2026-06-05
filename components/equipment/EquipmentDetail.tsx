@@ -25,6 +25,22 @@ export default function EquipmentDetail({
   const { user, profile, role } = useUser()
   const { equipment, history, nextStates, canAdvance, isLoading, mutate } = useEquipmentDetail(equipmentId)
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Edit fields state
+  const [editFr, setEditFr] = useState('')
+  const [editClientName, setEditClientName] = useState('')
+  const [editBrand, setEditBrand] = useState('')
+  const [editModel, setEditModel] = useState('')
+  const [editSerial, setEditSerial] = useState('')
+  const [editReportNumber, setEditReportNumber] = useState('')
+  const [editServiceType, setEditServiceType] = useState('')
+  const [editDateIn, setEditDateIn] = useState('')
+  const [editClientReport, setEditClientReport] = useState('')
+  const [editAccessories, setEditAccessories] = useState('')
+  const [editConditionIn, setEditConditionIn] = useState('')
+  const [editObservations, setEditObservations] = useState('')
 
   if (!equipmentId) return null
 
@@ -48,6 +64,73 @@ export default function EquipmentDetail({
   }
 
   const isSuperadmin = role === 'superadmin'
+
+  const startEditMode = () => {
+    if (!equipment) return
+    setEditFr(equipment.fr_number || '')
+    setEditClientName(equipment.client_name || '')
+    setEditBrand(equipment.brand || '')
+    setEditModel(equipment.model || '')
+    setEditSerial(equipment.serial_number || '')
+    setEditReportNumber(equipment.report_number || '')
+    setEditServiceType(equipment.service_type || 'REVISION_GENERAL')
+    if (equipment.date_in) {
+      try {
+        const d = new Date(equipment.date_in)
+        const offset = d.getTimezoneOffset()
+        const localDate = new Date(d.getTime() - (offset * 60 * 1000))
+        setEditDateIn(localDate.toISOString().slice(0, 16))
+      } catch {
+        setEditDateIn('')
+      }
+    } else {
+      setEditDateIn('')
+    }
+    setEditClientReport(equipment.client_report || '')
+    setEditAccessories(equipment.accessories || '')
+    setEditConditionIn(equipment.condition_in || '')
+    setEditObservations(equipment.additional_observations || '')
+    setIsEditing(true)
+  }
+
+  const handleSaveEdit = async () => {
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/equipment/${equipmentId}/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fr_number: editFr,
+          client_name: editClientName,
+          brand: editBrand,
+          model: editModel,
+          serial_number: editSerial,
+          report_number: editReportNumber,
+          service_type: editServiceType,
+          date_in: editDateIn ? new Date(editDateIn).toISOString() : undefined,
+          client_report: editClientReport,
+          accessories: editAccessories,
+          condition_in: editConditionIn,
+          additional_observations: editObservations,
+        })
+      })
+
+      const resData = await res.json()
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.error || 'No se pudo actualizar el equipo')
+      }
+
+      toast.success('Información del equipo actualizada con éxito')
+      setIsEditing(false)
+      mutate()
+      if (onStatusUpdated) onStatusUpdated()
+    } catch (err: any) {
+      console.error(err)
+      toast.error(err.message || 'Error al guardar cambios')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <>
@@ -87,39 +170,131 @@ export default function EquipmentDetail({
                     </div>
                   </div>
 
-                  {/* Acciones de cambio de estado */}
-                  {(canAdvance || isSuperadmin) && (
-                    <button
-                      onClick={() => setIsStatusModalOpen(true)}
-                      className="px-5 py-2.5 rounded-lg bg-electric text-white text-xs font-bold uppercase hover:shadow-neon-blue hover:brightness-110 transition-all"
-                    >
-                      {isSuperadmin ? '⚡ Cambiar/Forzar Estado' : '🔄 Avanzar Estado'}
-                    </button>
-                  )}
+                  {/* Acciones de cambio de estado / edición */}
+                  <div className="flex gap-2">
+                    {isSuperadmin && (
+                      <button
+                        onClick={isEditing ? handleSaveEdit : startEditMode}
+                        disabled={isSaving}
+                        className={`px-5 py-2.5 rounded-lg text-white text-xs font-bold uppercase hover:brightness-110 transition-all select-none ${
+                          isEditing
+                            ? 'bg-emerald-600 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                            : 'bg-neon-purple/70 border border-neon-purple hover:bg-neon-purple/90'
+                        }`}
+                      >
+                        {isSaving ? 'Guardando...' : isEditing ? '💾 Guardar Cambios' : '✏️ Editar Ficha'}
+                      </button>
+                    )}
+                    {isEditing && (
+                      <button
+                        onClick={() => setIsEditing(false)}
+                        className="px-5 py-2.5 rounded-lg bg-bg-surface hover:bg-bg-surface/85 border border-border-subtle text-text-primary text-xs font-bold uppercase transition-all select-none"
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                    {(canAdvance || isSuperadmin) && !isEditing && (
+                      <button
+                        onClick={() => setIsStatusModalOpen(true)}
+                        className="px-5 py-2.5 rounded-lg bg-electric text-white text-xs font-bold uppercase hover:shadow-neon-blue hover:brightness-110 transition-all select-none"
+                      >
+                        {isSuperadmin ? '⚡ Cambiar/Forzar Estado' : '🔄 Avanzar Estado'}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* 2. Información General */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-bg-base/20 p-5 rounded-lg border border-border-subtle">
                   <div className="space-y-3">
                     <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1">Datos Generales</h3>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="grid grid-cols-3 gap-3 text-xs items-center">
+                      <span className="text-text-secondary font-semibold uppercase">Ficha (FR):</span>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editFr}
+                          onChange={(e) => setEditFr(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2 font-mono font-bold text-neon-blue uppercase">{equipment.fr_number}</span>
+                      )}
+
                       <span className="text-text-secondary font-semibold uppercase">Cliente:</span>
-                      <span className="col-span-2 font-medium">{equipment.client_name}</span>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editClientName}
+                          onChange={(e) => setEditClientName(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2 font-medium">{equipment.client_name}</span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">Servicio:</span>
-                      <span className="col-span-2 font-mono text-[11px] text-neon-purple font-semibold">{equipment.service_type}</span>
+                      {isEditing ? (
+                        <select
+                          value={editServiceType}
+                          onChange={(e) => setEditServiceType(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
+                        >
+                          <option value="GARANTIA_CABELAB">GARANTÍA CABELAB</option>
+                          <option value="GARANTIA_ESAB">GARANTÍA ESAB</option>
+                          <option value="REVISION_GENERAL">REVISIÓN GENERAL</option>
+                        </select>
+                      ) : (
+                        <span className="col-span-2 font-mono text-[11px] text-neon-purple font-semibold">{equipment.service_type}</span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">Marca:</span>
-                      <span className="col-span-2 font-medium">{equipment.brand}</span>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editBrand}
+                          onChange={(e) => setEditBrand(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2 font-medium">{equipment.brand}</span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">Modelo:</span>
-                      <span className="col-span-2 font-medium">{equipment.model}</span>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editModel}
+                          onChange={(e) => setEditModel(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2 font-medium">{equipment.model}</span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">N° Serie:</span>
-                      <span className="col-span-2 font-mono">{equipment.serial_number}</span>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editSerial}
+                          onChange={(e) => setEditSerial(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2 font-mono">{equipment.serial_number}</span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">N° Informe:</span>
-                      <span className="col-span-2 font-mono text-neon-blue font-semibold">{equipment.report_number || 'PENDIENTE'}</span>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editReportNumber}
+                          onChange={(e) => setEditReportNumber(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2 font-mono text-neon-blue font-semibold">{equipment.report_number || 'PENDIENTE'}</span>
+                      )}
                     </div>
                   </div>
 
@@ -134,9 +309,18 @@ export default function EquipmentDetail({
                     </div>
 
                     <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1 pt-2">Tiempos Operativos</h3>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="grid grid-cols-3 gap-2 text-xs items-center">
                       <span className="text-text-secondary font-semibold uppercase">Ingreso:</span>
-                      <span className="col-span-2">{formatDate(equipment.date_in)}</span>
+                      {isEditing ? (
+                        <input
+                          type="datetime-local"
+                          value={editDateIn}
+                          onChange={(e) => setEditDateIn(e.target.value)}
+                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
+                        />
+                      ) : (
+                        <span className="col-span-2">{formatDate(equipment.date_in)}</span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">Diagnóstico:</span>
                       <span className="col-span-2">{equipment.start_diagnosis_at ? `${formatDate(equipment.start_diagnosis_at)} (Inicio)` : 'PENDIENTE'}</span>
@@ -151,30 +335,66 @@ export default function EquipmentDetail({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Falla Reportada por Cliente</span>
-                    <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap">
-                      {equipment.client_report || 'NINGUNO'}
-                    </div>
+                    {isEditing ? (
+                      <textarea
+                        value={editClientReport}
+                        onChange={(e) => setEditClientReport(e.target.value)}
+                        rows={3}
+                        className="w-full bg-bg-base border border-border-subtle rounded-lg p-2.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary resize-none"
+                      />
+                    ) : (
+                      <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap">
+                        {equipment.client_report || 'NINGUNO'}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Accesorios Incluidos</span>
-                    <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap">
-                      {equipment.accessories || 'NINGUNO'}
-                    </div>
+                    {isEditing ? (
+                      <textarea
+                        value={editAccessories}
+                        onChange={(e) => setEditAccessories(e.target.value)}
+                        rows={3}
+                        className="w-full bg-bg-base border border-border-subtle rounded-lg p-2.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary resize-none"
+                      />
+                    ) : (
+                      <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap">
+                        {equipment.accessories || 'NINGUNO'}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Condición Física de Ingreso</span>
-                    <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap">
-                      {equipment.condition_in || 'NINGUNO'}
-                    </div>
+                    {isEditing ? (
+                      <textarea
+                        value={editConditionIn}
+                        onChange={(e) => setEditConditionIn(e.target.value)}
+                        rows={3}
+                        className="w-full bg-bg-base border border-border-subtle rounded-lg p-2.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary resize-none"
+                      />
+                    ) : (
+                      <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap">
+                        {equipment.condition_in || 'NINGUNO'}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Observaciones Técnicas</span>
-                    <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap text-neon-blue">
-                      {equipment.additional_observations || 'NINGUNA'}
-                    </div>
+                    {isEditing ? (
+                      <textarea
+                        value={editObservations}
+                        onChange={(e) => setEditObservations(e.target.value)}
+                        rows={3}
+                        className="w-full bg-bg-base border border-border-subtle rounded-lg p-2.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary resize-none"
+                      />
+                    ) : (
+                      <div className="text-xs bg-bg-base/40 p-3 rounded-lg border border-border-subtle min-h-[70px] whitespace-pre-wrap text-neon-blue">
+                        {equipment.additional_observations || 'NINGUNA'}
+                      </div>
+                    )}
                   </div>
                 </div>
 

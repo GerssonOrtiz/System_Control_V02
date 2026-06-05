@@ -1,8 +1,8 @@
-// app/(dashboard)/equipos/page.tsx
 'use client'
 
 import React, { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
+import { toast } from 'sonner'
 import { useEquipmentList } from '@/hooks/useEquipmentList'
 import { useUser } from '@/hooks/useUser'
 import { useRealtimePizarra } from '@/hooks/useRealtimePizarra'
@@ -14,11 +14,43 @@ export default function EquiposPage() {
   const [currentPage, setCurrentPage] = useState(0)
   const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, false)
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
 
   // Realtime subscription
   useRealtimePizarra(mutate)
 
   const canRegister = ['superadmin', 'admin', 'recepcion'].includes(role || '')
+
+  const handleDeleteAll = async () => {
+    const confirmText = window.prompt(
+      '¿Está seguro de que desea eliminar permanentemente TODOS los equipos de la base de datos?\nEsta acción es irreversible y borrará el historial de estados de todos los equipos.\n\nPara confirmar, escriba "ELIMINAR" en la casilla de abajo:'
+    )
+
+    if (confirmText !== 'ELIMINAR') {
+      if (confirmText !== null) {
+        toast.error('Confirmación incorrecta. No se eliminaron los equipos.')
+      }
+      return
+    }
+
+    setIsDeletingAll(true)
+    try {
+      const res = await fetch('/api/equipment', {
+        method: 'DELETE',
+      })
+      const resData = await res.json()
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.error || 'Ocurrió un error al eliminar los equipos')
+      }
+      toast.success('Se han eliminado todos los equipos con éxito')
+      mutate()
+    } catch (err: any) {
+      console.error(err)
+      toast.error(err.message || 'Error al eliminar todos los equipos')
+    } finally {
+      setIsDeletingAll(false)
+    }
+  }
 
   const getPageTitle = () => {
     if (role === 'recepcion') return '📥 Módulo de Recepción — Equipos Relevantes'
@@ -46,6 +78,15 @@ export default function EquiposPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {role === 'superadmin' && (
+            <button
+              onClick={handleDeleteAll}
+              disabled={isDeletingAll}
+              className="px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] font-extrabold uppercase tracking-wider transition-all disabled:opacity-40 select-none shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+            >
+              {isDeletingAll ? '🔴 Eliminando...' : '🔴 Eliminar Todo'}
+            </button>
+          )}
           {['superadmin', 'admin', 'visualizador'].includes(role || '') && (
             <div className="flex gap-2">
               <a
