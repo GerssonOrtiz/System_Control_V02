@@ -115,9 +115,9 @@ export default function RegisterPage() {
               disabled={loading}
               placeholder="nombre_usuario"
               {...register('username')}
-              className={`w-full bg-white/3 border ${
-                errors.username ? 'border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)] focus:border-red-500/50' : 'border-white/8 focus:border-neon-blue/50 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.1)]'
-              } rounded-lg text-text-primary px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-text-muted`}
+              className={`w-full bg-black/60 border ${
+                errors.username ? 'border-red-500/70 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)] focus:border-red-500' : 'border-white/15 focus:border-neon-blue/70 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)]'
+              } rounded-lg text-white px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-white/30`}
             />
             {errors.username && (
               <p className="text-xs text-red-400 font-medium">{errors.username.message}</p>
@@ -133,9 +133,9 @@ export default function RegisterPage() {
               disabled={loading}
               placeholder="ejemplo@cabelab.pe"
               {...register('email')}
-              className={`w-full bg-white/3 border ${
-                errors.email ? 'border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)] focus:border-red-500/50' : 'border-white/8 focus:border-neon-blue/50 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.1)]'
-              } rounded-lg text-text-primary px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-text-muted`}
+              className={`w-full bg-black/60 border ${
+                errors.email ? 'border-red-500/70 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)] focus:border-red-500' : 'border-white/15 focus:border-neon-blue/70 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)]'
+              } rounded-lg text-white px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-white/30`}
             />
             {errors.email && (
               <p className="text-xs text-red-400 font-medium">{errors.email.message}</p>
@@ -151,9 +151,9 @@ export default function RegisterPage() {
               disabled={loading}
               placeholder="••••••••"
               {...register('password')}
-              className={`w-full bg-white/3 border ${
-                errors.password ? 'border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)] focus:border-red-500/50' : 'border-white/8 focus:border-neon-blue/50 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.1)]'
-              } rounded-lg text-text-primary px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-text-muted`}
+              className={`w-full bg-black/60 border ${
+                errors.password ? 'border-red-500/70 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)] focus:border-red-500' : 'border-white/15 focus:border-neon-blue/70 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)]'
+              } rounded-lg text-white px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-white/30`}
             />
             {errors.password && (
               <p className="text-xs text-red-400 font-medium">{errors.password.message}</p>
@@ -169,9 +169,9 @@ export default function RegisterPage() {
               disabled={loading}
               placeholder="••••••••"
               {...register('confirmPassword')}
-              className={`w-full bg-white/3 border ${
-                errors.confirmPassword ? 'border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.1)] focus:border-red-500/50' : 'border-white/8 focus:border-neon-blue/50 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.1)]'
-              } rounded-lg text-text-primary px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-text-muted`}
+              className={`w-full bg-black/60 border ${
+                errors.confirmPassword ? 'border-red-500/70 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)] focus:border-red-500' : 'border-white/15 focus:border-neon-blue/70 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)]'
+              } rounded-lg text-white px-4.5 py-2.5 text-sm outline-none transition-standard placeholder:text-white/30`}
             />
             {errors.confirmPassword && (
               <p className="text-xs text-red-400 font-medium">{errors.confirmPassword.message}</p>

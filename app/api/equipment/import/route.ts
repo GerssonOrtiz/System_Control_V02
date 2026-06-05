@@ -7,7 +7,7 @@ import { z } from 'zod'
 const importRowSchema = z.object({
   fr_number: z.string().min(1, 'El número de FR es requerido'),
   client_name: z.string().min(1, 'El nombre de cliente es requerido'),
-  service_type: z.enum(['REVISION_GENERAL', 'MANTENIMIENTO_PREVENTIVO', 'GARANTIA_CABELAB', 'REPARACION_MAYOR']),
+  service_type: z.enum(['REVISION_GENERAL', 'GARANTIA_CABELAB', 'GARANTIA_ESAB']),
   brand: z.string().min(1, 'La marca es requerida'),
   model: z.string().min(1, 'El modelo es requerido'),
   serial_number: z.string().min(1, 'El número de serie es requerido'),
@@ -78,15 +78,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No se pudo determinar el estado inicial del workflow en el sistema' }, { status: 500 })
     }
 
-    // Iterar y procesar cada fila
+    // --- OPTIMIZACIÓN CRÍTICA: Búsqueda masiva en una sola query ---
+    // Obtener todos los FR existentes para verificar localmente y evitar queries secuenciales (evita timeouts en Vercel)
+    const { data: allExisting, error: fetchAllError } = await supabase
+      .from('equipment_records')
+      .select('fr_number')
+
+    if (fetchAllError) {
+      return NextResponse.json({ success: false, error: 'Error al consultar registros existentes' }, { status: 500 })
+    }
+
+    const existingFrSet = new Set((allExisting || []).map((e: any) => e.fr_number.toUpperCase()))
+    const recordsToInsert: any[] = []
+
+    // Iterar y procesar cada fila en memoria
     for (let i = 0; i < rawRows.length; i++) {
       const row = rawRows[i]
       const rowNumber = i + 2 // Base 1, más cabecera
 
-      // Mapear cabeceras flexibles (soportar FR o fr_number, etc.)
+      // Mapear cabeceras flexibles
       const frValue = (row['FR'] || row['fr'] || row['fr_number'] || '').toString().trim()
       const clientNameValue = (row['Cliente'] || row['cliente'] || row['client_name'] || '').toString().trim()
-      const serviceTypeValue = (row['Tipo Servicio'] || row['tipo_servicio'] || row['service_type'] || '').toString().trim()
+      
+      // Normalizar tipo de servicio a mayúsculas con guiones bajos si es necesario
+      let serviceTypeValue = (row['Tipo Servicio'] || row['tipo_servicio'] || row['service_type'] || '').toString().trim().toUpperCase()
+      serviceTypeValue = serviceTypeValue.replace(/\s+/g, '_')
+
       const brandValue = (row['Marca'] || row['marca'] || row['brand'] || '').toString().trim()
       const modelValue = (row['Modelo'] || row['modelo'] || row['model'] || '').toString().trim()
       const serialValue = (row['N° Serie'] || row['n_serie'] || row['serial_number'] || '').toString().trim()
@@ -114,8 +131,8 @@ export async function POST(request: NextRequest) {
       // Validar con Zod
       const validationResult = importRowSchema.safeParse(parsedPayload)
       if (!validationResult.success) {
-        const errorDetails = (validationResult as any).error
-        const firstErrorMsg = errorDetails.errors[0]?.message || 'Datos de fila inválidos'
+        const errorDetails = validationResult.error
+        const firstErrorMsg = errorDetails.errors[0]?.message || 'Datos de fila inválidos o tipo de servicio incorrecto'
         errorsList.push({
           row: rowNumber,
           fr: frValue || null,
@@ -124,25 +141,11 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      const validData = validationResult.data as any
+      const validData = validationResult.data
 
-      // Verificar si ya existe en la base de datos
-      const { data: existingEq, error: checkError } = await supabase
-        .from('equipment_records')
-        .select('id')
-        .eq('fr_number', validData.fr_number.toUpperCase())
-        .maybeSingle()
-
-      if (checkError) {
-        errorsList.push({
-          row: rowNumber,
-          fr: validData.fr_number,
-          reason: 'Error al verificar existencia de Ficha de Recepción',
-        })
-        continue
-      }
-
-      if (existingEq) {
+      // Validar duplicado localmente usando el Set
+      const frUpper = validData.fr_number.toUpperCase()
+      if (existingFrSet.has(frUpper)) {
         skippedCount++
         errorsList.push({
           row: rowNumber,
@@ -152,35 +155,38 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      // Insertar nuevo equipo con valores normalizados a MAYÚSCULAS
+      // Agregar a la lista para inserción masiva
+      recordsToInsert.push({
+        fr_number: frUpper,
+        client_name: validData.client_name.toUpperCase(),
+        service_type: validData.service_type,
+        brand: validData.brand.toUpperCase(),
+        model: validData.model.toUpperCase(),
+        serial_number: validData.serial_number.toUpperCase(),
+        report_number: validData.report_number ? validData.report_number.toUpperCase() : null,
+        client_report: validData.client_report ? validData.client_report.toUpperCase() : null,
+        accessories: validData.accessories ? validData.accessories.toUpperCase() : null,
+        condition_in: validData.condition_in ? validData.condition_in.toUpperCase() : null,
+        additional_observations: validData.additional_observations ? validData.additional_observations.toUpperCase() : null,
+        current_status_id: initialState.id,
+        created_by: user.id,
+      })
+
+      // Agregar al Set temporal para prevenir duplicados dentro del mismo Excel
+      existingFrSet.add(frUpper)
+    }
+
+    // Realizar inserción masiva (bulk insert)
+    if (recordsToInsert.length > 0) {
       const { error: insertError } = await (supabase
         .from('equipment_records') as any)
-        .insert({
-          fr_number: validData.fr_number.toUpperCase(),
-          client_name: validData.client_name.toUpperCase(),
-          service_type: validData.service_type,
-          brand: validData.brand.toUpperCase(),
-          model: validData.model.toUpperCase(),
-          serial_number: validData.serial_number.toUpperCase(),
-          report_number: validData.report_number ? validData.report_number.toUpperCase() : null,
-          client_report: validData.client_report ? validData.client_report.toUpperCase() : null,
-          accessories: validData.accessories ? validData.accessories.toUpperCase() : null,
-          condition_in: validData.condition_in ? validData.condition_in.toUpperCase() : null,
-          additional_observations: validData.additional_observations ? validData.additional_observations.toUpperCase() : null,
-          current_status_id: initialState.id,
-          created_by: user.id,
-        })
+        .insert(recordsToInsert)
 
       if (insertError) {
-        console.error('[POST /api/equipment/import] Insert row error:', insertError)
-        errorsList.push({
-          row: rowNumber,
-          fr: validData.fr_number,
-          reason: 'Error al guardar equipo en base de datos',
-        })
-      } else {
-        importedCount++
+        console.error('[POST /api/equipment/import] Bulk insert error:', insertError)
+        return NextResponse.json({ success: false, error: 'Error al guardar los registros en la base de datos' }, { status: 500 })
       }
+      importedCount = recordsToInsert.length
     }
 
     return NextResponse.json({
