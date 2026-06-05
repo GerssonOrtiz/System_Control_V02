@@ -77,7 +77,7 @@ export default function PizarraBoard() {
                 </div>
 
                 {/* Cards Area */}
-                <div className="space-y-2.5 overflow-y-auto flex-1 pr-1 scrollbar-thin min-h-[80px]">
+                <div className="space-y-1 overflow-y-auto flex-1 pr-1 scrollbar-thin min-h-[80px]">
                   {equipmentsInCol.length === 0 ? (
                     <div className="text-center py-6 text-[10px] text-text-muted italic">
                       Sin equipos
@@ -125,7 +125,7 @@ export default function PizarraBoard() {
                 </div>
 
                 {/* Cards Area */}
-                <div className="space-y-2.5 overflow-y-auto flex-1 pr-1 scrollbar-thin min-h-[80px]">
+                <div className="space-y-1 overflow-y-auto flex-1 pr-1 scrollbar-thin min-h-[80px]">
                   {equipmentsInCol.length === 0 ? (
                     <div className="text-center py-6 text-[10px] text-text-muted italic">
                       Sin equipos
