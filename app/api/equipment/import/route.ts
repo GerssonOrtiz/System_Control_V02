@@ -185,6 +185,25 @@ export async function POST(request: NextRequest) {
       let stateRaw = readField(row,
         'ESTADO', 'Estado', 'estado', 'status', 'status_name'
       ).trim().toUpperCase()
+
+      // Mapeo de sinónimos comunes del Excel (sin acentos o variaciones) a nombres oficiales
+      const stateSynonyms: Record<string, string> = {
+        'DIAGNOSTICO': 'EN DIAGNÓSTICO',
+        'EN DIAGNOSTICO': 'EN DIAGNÓSTICO',
+        'PENDIENTE DE APROBACION': 'PENDIENTE DE APROBACIÓN',
+        'PENDIENTE APROBACION': 'PENDIENTE DE APROBACIÓN',
+        'ESPERA DE REPUESTO': 'EN ESPERA DE REPUESTO',
+        'MANTENIMIENTO': 'EN MANTENIMIENTO',
+        'EN REPARACION': 'EN MANTENIMIENTO',
+        'REPARACION': 'EN MANTENIMIENTO',
+        'TERMINADO': 'ENTREGADO',
+        'CULMINADO': 'ENTREGADO',
+      }
+
+      if (stateSynonyms[stateRaw]) {
+        stateRaw = stateSynonyms[stateRaw]
+      }
+
       // El estado ya se llama 'ENTREGADO' en la base de datos según el nuevo workflow simplificado
       const currentStatusId = statesMap.get(stateRaw) || initialState.id
 
