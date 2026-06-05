@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       const validationResult = importRowSchema.safeParse(parsedPayload)
       if (!validationResult.success) {
         const errorDetails = validationResult.error
-        const firstErrorMsg = errorDetails.errors[0]?.message || 'Datos de fila inválidos o tipo de servicio incorrecto'
+        const firstErrorMsg = errorDetails.issues[0]?.message || 'Datos de fila inválidos o tipo de servicio incorrecto'
         errorsList.push({
           row: rowNumber,
           fr: frValue || null,
