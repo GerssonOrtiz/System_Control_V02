@@ -153,13 +153,15 @@ export async function POST(request: NextRequest) {
         'CLIENTE', 'Cliente', 'cliente', 'client_name'
       ).toUpperCase()
 
-      const brandValue = readField(row,
+      const brandRaw = readField(row,
         'MARCA', 'Marca', 'marca', 'brand'
-      ).toUpperCase()
+      )
+      const brandValue = brandRaw !== '' ? brandRaw.toUpperCase() : 'S/M'
 
-      const modelValue = readField(row,
+      const modelRaw = readField(row,
         'MODELO', 'Modelo', 'modelo', 'model'
-      ).toUpperCase()
+      )
+      const modelValue = modelRaw !== '' ? modelRaw.toUpperCase() : 'S/M'
 
       // Serial: si está vacío → "N/S"
       const serialRaw = readField(row,
@@ -180,9 +182,10 @@ export async function POST(request: NextRequest) {
       )
 
       // ESTADO: Buscar coincidencia con la base de datos
-      const stateRaw = readField(row,
+      let stateRaw = readField(row,
         'ESTADO', 'Estado', 'estado', 'status', 'status_name'
       ).trim().toUpperCase()
+      // El estado ya se llama 'ENTREGADO' en la base de datos según el nuevo workflow simplificado
       const currentStatusId = statesMap.get(stateRaw) || initialState.id
 
       // FECHA DE INGRESO: Leer e interpretar la fecha de ingreso
@@ -192,16 +195,6 @@ export async function POST(request: NextRequest) {
       // ─── Validación mínima ─────────────────────────────────────────────────
       if (!clientNameValue) {
         errorsList.push({ row: rowNumber, fr: frValue || 'S/N', reason: 'El campo CLIENTE está vacío' })
-        continue
-      }
-
-      if (!brandValue) {
-        errorsList.push({ row: rowNumber, fr: frValue || 'S/N', reason: 'El campo MARCA está vacío' })
-        continue
-      }
-
-      if (!modelValue) {
-        errorsList.push({ row: rowNumber, fr: frValue || 'S/N', reason: 'El campo MODELO está vacío' })
         continue
       }
 

@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
     // 5. Normalizar todos los textos a MAYÚSCULAS
     const fr_number = data.fr_number.trim().toUpperCase()
     const client_name = data.client_name.trim().toUpperCase()
-    const brand = data.brand.trim().toUpperCase()
-    const model = data.model.trim().toUpperCase()
-    const serial_number = data.serial_number.trim().toUpperCase()
+    const brand = data.brand?.trim() ? data.brand.trim().toUpperCase() : 'S/M'
+    const model = data.model?.trim() ? data.model.trim().toUpperCase() : 'S/M'
+    const serial_number = data.serial_number?.trim() ? data.serial_number.trim().toUpperCase() : 'N/S'
     const client_report = data.client_report?.trim().toUpperCase() || null
     const accessories = data.accessories?.trim().toUpperCase() || null
     const condition_in = data.condition_in?.trim().toUpperCase() || null

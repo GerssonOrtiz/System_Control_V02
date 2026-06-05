@@ -12,14 +12,10 @@ const STATUS_COLORS: Record<string, string> = {
   'En diagnóstico': '#0052FF',
   'En espera de repuesto': '#9D4EDD',
   'Pendiente de aprobación': '#F59E0B',
-  'Repuesto entregado': '#6366F1',
   'Aprobado': '#10B981',
-  'Inicio de mantenimiento': '#0052FF',
   'En mantenimiento': '#0052FF',
   'En espera de repuesto adicional': '#9D4EDD',
-  'Control de calidad': '#F59E0B',
-  'Servicio culminado': '#10B981',
-  'Entregado': '#6B7280',
+  'Entregado': '#10B981',
 }
 
 export default function StatusBadge({ status, color }: StatusBadgeProps) {

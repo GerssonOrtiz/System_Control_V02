@@ -24,9 +24,7 @@ export default function TallerPage() {
 
   // Columna 2: Aprobados / Mantenimiento
   const col2States = [
-    'Repuesto entregado',
     'Aprobado',
-    'Inicio de mantenimiento',
     'En mantenimiento',
     'En espera de repuesto adicional',
   ]

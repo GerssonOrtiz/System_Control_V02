@@ -50,8 +50,10 @@ export async function GET(request: NextRequest) {
         `client_name.ilike.%${searchQuery}%,` +
         `brand.ilike.%${searchQuery}%,` +
         `model.ilike.%${searchQuery}%,` +
-        `serial_number.ilike.%${searchQuery}%`
+        `serial_number.ilike.%${searchQuery}%,` +
+        `status_name.ilike.%${searchQuery}%`
       )
+      .order('date_in', { ascending: false })
       .limit(50)
 
     if (error) {

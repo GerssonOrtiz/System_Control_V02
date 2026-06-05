@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { toast } from 'sonner'
 import { useEquipmentList } from '@/hooks/useEquipmentList'
@@ -12,14 +12,49 @@ import EquipmentForm from '@/components/equipment/EquipmentForm'
 export default function EquiposPage() {
   const { role } = useUser()
   const [currentPage, setCurrentPage] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[] | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
   const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Realtime subscription
   useRealtimePizarra(mutate)
 
   const canRegister = ['superadmin', 'admin', 'recepcion'].includes(role || '')
+
+  // Búsqueda con debounce de 350ms
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSearchResults(null)
+      return
+    }
+
+    searchTimer.current = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const res = await fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}`)
+        const data = await res.json()
+        if (data.success) {
+          setSearchResults(data.data.results || [])
+        } else {
+          setSearchResults([])
+        }
+      } catch {
+        setSearchResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 350)
+
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
+    }
+  }, [searchQuery])
 
   const handleDeleteAll = async () => {
     const confirmText = window.prompt(
@@ -35,14 +70,14 @@ export default function EquiposPage() {
 
     setIsDeletingAll(true)
     try {
-      const res = await fetch('/api/equipment', {
-        method: 'DELETE',
-      })
+      const res = await fetch('/api/equipment', { method: 'DELETE' })
       const resData = await res.json()
       if (!res.ok || !resData.success) {
         throw new Error(resData.error || 'Ocurrió un error al eliminar los equipos')
       }
       toast.success('Se han eliminado todos los equipos con éxito')
+      setSearchQuery('')
+      setSearchResults(null)
       mutate()
     } catch (err: any) {
       console.error(err)
@@ -59,17 +94,19 @@ export default function EquiposPage() {
   }
 
   const getPageDescription = () => {
-    if (role === 'recepcion') {
-      return 'Registro de nuevos ingresos y entrega de motosoldadoras culminadas.'
-    }
-    if (role === 'almacen') {
-      return 'Bandeja de equipos pendientes de entrega de repuestos técnicos.'
-    }
+    if (role === 'recepcion') return 'Registro de nuevos ingresos y entrega de motosoldadoras culminadas.'
+    if (role === 'almacen') return 'Bandeja de equipos pendientes de entrega de repuestos técnicos.'
     return 'Seguimiento completo de todos los equipos en proceso activo.'
   }
 
+  // Determina qué lista mostrar en la tabla
+  const displayEquipments = searchResults !== null ? searchResults : equipments
+  const displayTotal = searchResults !== null ? searchResults.length : total
+  const isInSearchMode = searchResults !== null
+  const showLoader = isSearching || (isLoading && !isInSearchMode)
+
   return (
-    <div className="space-y-6 font-sans text-text-primary p-6">
+    <div className="space-y-5 font-sans text-text-primary p-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -77,7 +114,7 @@ export default function EquiposPage() {
           <p className="text-text-secondary text-xs mt-1">{getPageDescription()}</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {role === 'superadmin' && (
             <button
               onClick={handleDeleteAll}
@@ -133,21 +170,81 @@ export default function EquiposPage() {
         </div>
       </div>
 
+      {/* ─── Barra de búsqueda ─── */}
+      <div className="bg-bg-surface border border-border-subtle rounded-xl p-3 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm select-none pointer-events-none">
+              🔍
+            </span>
+            <input
+              type="text"
+              id="equipment-search"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setCurrentPage(0)
+              }}
+              placeholder="Buscar por FR, cliente, marca, modelo, estado..."
+              className="w-full bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:shadow-[0_0_8px_rgba(0,229,255,0.15)] transition-all font-sans"
+            />
+            {isSearching && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neon-blue text-[10px] animate-pulse font-mono">
+                Buscando...
+              </span>
+            )}
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery('')
+                setSearchResults(null)
+              }}
+              className="px-3 py-2 text-[10px] font-bold uppercase text-text-secondary border border-border-subtle rounded-lg hover:border-neon-blue hover:text-neon-blue transition-all select-none"
+            >
+              ✕ Limpiar
+            </button>
+          )}
+        </div>
+
+        {/* Indicadores de búsqueda activa */}
+        {isInSearchMode && (
+          <div className="flex items-center gap-2 mt-2 px-1">
+            <span className="text-[10px] text-text-secondary font-mono">
+              {displayTotal === 0
+                ? 'Sin resultados para '
+                : `${displayTotal} resultado${displayTotal !== 1 ? 's' : ''} para `}
+              <span className="text-neon-blue font-bold">"{searchQuery}"</span>
+            </span>
+            <span className="text-[10px] text-text-muted">— buscando en FR, cliente, marca, modelo, estado</span>
+          </div>
+        )}
+      </div>
+
       {/* Main Table Card */}
       <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 shadow-sm">
-        {isLoading ? (
+        {showLoader ? (
           <div className="flex justify-center items-center py-20">
             <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">
-              Cargando lista de equipos...
+              {isSearching ? 'Buscando equipos...' : 'Cargando lista de equipos...'}
             </span>
           </div>
         ) : (
           <EquipmentTable
-            equipments={equipments}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            onUpdateSuccess={mutate}
+            equipments={displayEquipments}
+            currentPage={isInSearchMode ? 0 : currentPage}
+            totalPages={isInSearchMode ? 1 : totalPages}
+            onPageChange={isInSearchMode ? undefined : setCurrentPage}
+            onUpdateSuccess={() => {
+              mutate()
+              if (searchQuery.trim().length >= 2) {
+                // Refresca el resultado de búsqueda también
+                fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}`)
+                  .then(r => r.json())
+                  .then(d => { if (d.success) setSearchResults(d.data.results || []) })
+                  .catch(() => {})
+              }
+            }}
           />
         )}
       </div>

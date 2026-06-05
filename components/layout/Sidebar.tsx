@@ -1,6 +1,5 @@
 // components/layout/Sidebar.tsx
-'use client'
-
+import { useState } from 'react'
 import { useUser } from '@/hooks/useUser'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -80,6 +79,7 @@ const ALL_SIDEBAR_ITEMS: Record<string, SidebarItem> = {
 export function Sidebar() {
   const { role, loading } = useUser()
   const pathname = usePathname()
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   if (loading) {
     return (
@@ -104,12 +104,23 @@ export function Sidebar() {
     .filter(Boolean)
 
   return (
-    <aside className="w-[200px] bg-bg-surface border-r border-white/6 flex flex-col justify-between font-sans selection:bg-neon-blue selection:text-bg-base select-none shrink-0">
+    <aside 
+      className={`bg-bg-surface border-r border-white/6 flex flex-col justify-between font-sans selection:bg-neon-blue selection:text-bg-base select-none shrink-0 transition-all duration-300 relative ${
+        isCollapsed ? 'w-[70px]' : 'w-[200px]'
+      }`}
+    >
+      {/* Botón para colapsar */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-10 w-6 h-6 bg-bg-surface border border-white/10 rounded-full flex items-center justify-center text-[10px] text-text-secondary hover:text-neon-blue hover:border-neon-blue transition-all z-10 shadow-lg"
+      >
+        {isCollapsed ? '→' : '←'}
+      </button>
       
       {/* Lista de navegación */}
-      <nav className="p-4 space-y-1">
-        <div className="px-3 mb-4">
-          <span className="text-[10px] text-text-muted font-bold tracking-widest uppercase font-mono">
+      <nav className="p-4 space-y-1 overflow-hidden">
+        <div className={`px-3 mb-4 transition-opacity duration-200 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>
+          <span className="text-[10px] text-text-muted font-bold tracking-widest uppercase font-mono whitespace-nowrap">
             Navegación
           </span>
         </div>
@@ -119,27 +130,30 @@ export function Sidebar() {
             <Link
               key={item.key}
               href={item.href}
+              title={isCollapsed ? item.label : undefined}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-standard ${
                 isActive
                   ? 'bg-neon-blue/8 border border-neon-blue/20 text-neon-blue shadow-[0_0_10px_rgba(0,229,255,0.05)]'
                   : 'text-text-secondary hover:text-text-primary hover:bg-white/3 border border-transparent'
               }`}
             >
-              <span className="text-base leading-none">{item.icon}</span>
-              <span>{item.label}</span>
+              <span className="text-base leading-none shrink-0">{item.icon}</span>
+              <span className={`transition-opacity duration-200 whitespace-nowrap ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>
+                {item.label}
+              </span>
             </Link>
           )
         })}
       </nav>
 
       {/* Info Pie de Sidebar */}
-      <div className="p-4 border-t border-white/6">
-        <div className="bg-bg-base/40 border border-white/3 rounded-lg p-3 text-center">
-          <span className="block text-[10px] text-text-muted font-mono leading-none">
+      <div className={`p-4 border-t border-white/6 transition-all duration-200 ${isCollapsed ? 'px-2' : 'p-4'}`}>
+        <div className="bg-bg-base/40 border border-white/3 rounded-lg p-3 text-center overflow-hidden">
+          <span className={`block text-[10px] text-text-muted font-mono leading-none whitespace-nowrap ${isCollapsed ? 'hidden' : 'block'}`}>
             ZONA HORARIA
           </span>
           <span className="block text-xs font-semibold text-text-secondary mt-1 font-mono">
-            America/Lima
+            {isCollapsed ? 'PE' : 'America/Lima'}
           </span>
         </div>
       </div>

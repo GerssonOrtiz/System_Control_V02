@@ -44,9 +44,9 @@ export async function PUT(
     const updateData: any = {}
     if (body.fr_number !== undefined) updateData.fr_number = body.fr_number.trim().toUpperCase()
     if (body.client_name !== undefined) updateData.client_name = body.client_name.trim().toUpperCase()
-    if (body.brand !== undefined) updateData.brand = body.brand.trim().toUpperCase()
-    if (body.model !== undefined) updateData.model = body.model.trim().toUpperCase()
-    if (body.serial_number !== undefined) updateData.serial_number = body.serial_number.trim().toUpperCase()
+    if (body.brand !== undefined) updateData.brand = body.brand.trim() ? body.brand.trim().toUpperCase() : 'S/M'
+    if (body.model !== undefined) updateData.model = body.model.trim() ? body.model.trim().toUpperCase() : 'S/M'
+    if (body.serial_number !== undefined) updateData.serial_number = body.serial_number.trim() ? body.serial_number.trim().toUpperCase() : 'N/S'
     
     if (body.report_number !== undefined) updateData.report_number = body.report_number.trim().toUpperCase() || null
     if (body.client_report !== undefined) updateData.client_report = body.client_report.trim().toUpperCase() || null
@@ -59,8 +59,6 @@ export async function PUT(
 
     // 5. Validaciones mínimas
     if (updateData.client_name === '') return NextResponse.json({ success: false, error: 'El cliente no puede estar vacío' }, { status: 400 })
-    if (updateData.brand === '') return NextResponse.json({ success: false, error: 'La marca no puede estar vacía' }, { status: 400 })
-    if (updateData.model === '') return NextResponse.json({ success: false, error: 'El modelo no puede estar vacío' }, { status: 400 })
     if (updateData.fr_number === '') return NextResponse.json({ success: false, error: 'El número de FR no puede estar vacío' }, { status: 400 })
 
     // 6. Verificar si el nuevo FR ya existe en otro equipo

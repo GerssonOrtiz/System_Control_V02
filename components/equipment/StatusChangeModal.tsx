@@ -49,7 +49,7 @@ export default function StatusChangeModal({
     : nextStates.find((s) => s.id === parseInt(targetStatusId, 10))
 
   const isTargetDiagnosis = selectedStateObj?.name.trim().toLowerCase() === 'en diagnóstico'
-  const isTargetMaintenance = selectedStateObj?.name.trim().toLowerCase() === 'inicio de mantenimiento'
+  const isTargetMaintenance = selectedStateObj?.name.trim().toLowerCase() === 'en mantenimiento'
 
   const requiresTech = isTargetDiagnosis || isTargetMaintenance
 

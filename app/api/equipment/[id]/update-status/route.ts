@@ -94,7 +94,7 @@ export async function POST(
       }
     }
 
-    if (activeTargetState.name.trim().toLowerCase() === 'inicio de mantenimiento') {
+    if (activeTargetState.name.trim().toLowerCase() === 'en mantenimiento') {
       if (!maintenance_tech_id) {
         return NextResponse.json({ success: false, error: 'El técnico de mantenimiento es requerido para iniciar la fase de servicio' }, { status: 400 })
       }

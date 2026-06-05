@@ -99,17 +99,16 @@ export const ROLE_RELEVANT_STATES: Record<string, string[]> = {
   operaciones: [
     'En espera de diagnóstico',
     'En diagnóstico',
-    'Repuesto entregado',
+    'En espera de repuesto',
     'Aprobado',
-    'Inicio de mantenimiento',
     'En mantenimiento',
     'En espera de repuesto adicional',
-    'Control de calidad',
   ],
   recepcion: [
     'En espera de diagnóstico',
     'Pendiente de aprobación',
-    'Servicio culminado',
+    'Aprobado',
+    'Entregado',
   ],
   almacen: [
     'En espera de repuesto',

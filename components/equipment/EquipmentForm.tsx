@@ -124,12 +124,12 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
         {/* Marca */}
         <div className="space-y-1">
           <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Marca *
+            Marca
           </label>
           <input
             type="text"
             {...register('brand')}
-            placeholder="ej: MILLER"
+            placeholder="ej: MILLER (opcional)"
             className={`w-full bg-bg-base/50 border ${
               errors.brand ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
@@ -142,12 +142,12 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
         {/* Modelo */}
         <div className="space-y-1">
           <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Modelo *
+            Modelo
           </label>
           <input
             type="text"
             {...register('model')}
-            placeholder="ej: XMT 350"
+            placeholder="ej: XMT 350 (opcional)"
             className={`w-full bg-bg-base/50 border ${
               errors.model ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
@@ -160,12 +160,12 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
         {/* Número de Serie */}
         <div className="space-y-1">
           <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Número de Serie *
+            Número de Serie
           </label>
           <input
             type="text"
             {...register('serial_number')}
-            placeholder="ej: SN-123456"
+            placeholder="ej: SN-123456 (opcional)"
             className={`w-full bg-bg-base/50 border ${
               errors.serial_number ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all font-mono`}
