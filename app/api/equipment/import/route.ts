@@ -136,28 +136,33 @@ export async function POST(request: NextRequest) {
       // FECHA DE INGRESO: se ignora — se usa la fecha actual (default de la BD)
 
       // ─── Validación mínima ─────────────────────────────────────────────────
-      if (!frValue) {
-        errorsList.push({ row: rowNumber, fr: null, reason: 'El campo FR está vacío o no se encontró en esta fila' })
-        continue
-      }
-
       if (!clientNameValue) {
-        errorsList.push({ row: rowNumber, fr: frValue, reason: 'El campo CLIENTE está vacío' })
+        errorsList.push({ row: rowNumber, fr: frValue || 'S/N', reason: 'El campo CLIENTE está vacío' })
         continue
       }
 
       if (!brandValue) {
-        errorsList.push({ row: rowNumber, fr: frValue, reason: 'El campo MARCA está vacío' })
+        errorsList.push({ row: rowNumber, fr: frValue || 'S/N', reason: 'El campo MARCA está vacío' })
         continue
       }
 
       if (!modelValue) {
-        errorsList.push({ row: rowNumber, fr: frValue, reason: 'El campo MODELO está vacío' })
+        errorsList.push({ row: rowNumber, fr: frValue || 'S/N', reason: 'El campo MODELO está vacío' })
         continue
       }
 
+      // Generar FR único si no viene especificado
+      let frUpper = frValue
+      if (!frUpper) {
+        let suffix = 0
+        let generatedFr = `S-FR-${Date.now()}-${i}`
+        while (existingFrSet.has(generatedFr)) {
+          generatedFr = `S-FR-${Date.now()}-${i}-${suffix++}`
+        }
+        frUpper = generatedFr
+      }
+
       // ─── Verificar duplicado en memoria ────────────────────────────────────
-      const frUpper = frValue
       if (existingFrSet.has(frUpper)) {
         skippedCount++
         errorsList.push({ row: rowNumber, fr: frUpper, reason: 'Ya existe en el sistema (omitido)' })
