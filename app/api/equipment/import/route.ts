@@ -2,21 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import * as XLSX from 'xlsx'
-import { z } from 'zod'
-
-const importRowSchema = z.object({
-  fr_number: z.string().min(1, 'El número de FR es requerido'),
-  client_name: z.string().min(1, 'El nombre de cliente es requerido'),
-  service_type: z.enum(['REVISION_GENERAL', 'GARANTIA_CABELAB', 'GARANTIA_ESAB']),
-  brand: z.string().min(1, 'La marca es requerida'),
-  model: z.string().min(1, 'El modelo es requerido'),
-  serial_number: z.string().min(1, 'El número de serie es requerido'),
-  report_number: z.string().optional().nullable(),
-  client_report: z.string().optional().nullable(),
-  accessories: z.string().optional().nullable(),
-  condition_in: z.string().optional().nullable(),
-  additional_observations: z.string().optional().nullable(),
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,8 +41,8 @@ export async function POST(request: NextRequest) {
     const sheetName = workbook.SheetNames[0]
     const worksheet = workbook.Sheets[sheetName]
 
-    // Convertir a JSON mapeando columnas
-    const rawRows = XLSX.utils.sheet_to_json<any>(worksheet)
+    // Convertir a JSON
+    const rawRows = XLSX.utils.sheet_to_json<any>(worksheet, { defval: '' })
 
     if (rawRows.length === 0) {
       return NextResponse.json({ success: false, error: 'El archivo Excel está vacío o no tiene el formato correcto' }, { status: 400 })
@@ -67,7 +52,7 @@ export async function POST(request: NextRequest) {
     let skippedCount = 0
     const errorsList: Array<{ row: number; fr: string | null; reason: string }> = []
 
-    // Obtener estado inicial (is_initial = true)
+    // Obtener estado inicial del workflow
     const { data: initialState, error: stateError } = await supabase
       .from('workflow_states')
       .select('id')
@@ -75,11 +60,10 @@ export async function POST(request: NextRequest) {
       .single() as any
 
     if (stateError || !initialState) {
-      return NextResponse.json({ success: false, error: 'No se pudo determinar el estado inicial del workflow en el sistema' }, { status: 500 })
+      return NextResponse.json({ success: false, error: 'No se pudo determinar el estado inicial del workflow' }, { status: 500 })
     }
 
-    // --- OPTIMIZACIÓN CRÍTICA: Búsqueda masiva en una sola query ---
-    // Obtener todos los FR existentes para verificar localmente y evitar queries secuenciales (evita timeouts en Vercel)
+    // Carga masiva de FRs existentes para verificación en memoria
     const { data: allExisting, error: fetchAllError } = await supabase
       .from('equipment_records')
       .select('fr_number')
@@ -91,92 +75,117 @@ export async function POST(request: NextRequest) {
     const existingFrSet = new Set((allExisting || []).map((e: any) => e.fr_number.toUpperCase()))
     const recordsToInsert: any[] = []
 
-    // Iterar y procesar cada fila en memoria
+    // Helper para leer un campo flexible de la fila con múltiples variantes de nombre
+    const readField = (row: any, ...keys: string[]): string => {
+      for (const key of keys) {
+        const val = row[key]
+        if (val !== undefined && val !== null && val.toString().trim() !== '') {
+          return val.toString().trim()
+        }
+      }
+      return ''
+    }
+
+    // Iterar cada fila del Excel
     for (let i = 0; i < rawRows.length; i++) {
       const row = rawRows[i]
-      const rowNumber = i + 2 // Base 1, más cabecera
+      const rowNumber = i + 2 // Base 1 + cabecera
 
-      // Mapear cabeceras flexibles
-      const frValue = (row['FR'] || row['fr'] || row['fr_number'] || '').toString().trim()
-      const clientNameValue = (row['Cliente'] || row['cliente'] || row['client_name'] || '').toString().trim()
+      // ─── Mapeo de columnas del Excel del usuario ───────────────────────────
+      // Formato: FR | No DIAG | CLIENTE | FECHA DE INGRESO | MARCA | MODELO | NUMERO DE SERIE | REPORTE DE CLIENTE | ACCESORIOS | ESTADO | CONDICION
       
-      // Normalizar tipo de servicio a mayúsculas con guiones bajos si es necesario
-      let serviceTypeValue = (row['Tipo Servicio'] || row['tipo_servicio'] || row['service_type'] || '').toString().trim().toUpperCase()
-      serviceTypeValue = serviceTypeValue.replace(/\s+/g, '_')
+      const frValue = readField(row,
+        'FR', 'fr', 'fr_number', 'Nro FR', 'NRO FR', 'NRO. FR', 'N° FR'
+      ).toUpperCase()
 
-      const brandValue = (row['Marca'] || row['marca'] || row['brand'] || '').toString().trim()
-      const modelValue = (row['Modelo'] || row['modelo'] || row['model'] || '').toString().trim()
-      const serialValue = (row['N° Serie'] || row['n_serie'] || row['serial_number'] || '').toString().trim()
-      
-      const reportNumberValue = (row['N° Informe'] || row['n_informe'] || row['report_number'] || '').toString().trim()
-      const clientReportValue = (row['Reporte Cliente'] || row['reporte_cliente'] || row['client_report'] || '').toString().trim()
-      const accessoriesValue = (row['Accesorios'] || row['accesorios'] || '').toString().trim()
-      const conditionValue = (row['Condición Ingreso'] || row['condicion_ingreso'] || row['condition_in'] || '').toString().trim()
-      const observationsValue = (row['Observaciones'] || row['observaciones'] || row['additional_observations'] || '').toString().trim()
+      const reportNumberValue = readField(row,
+        'No DIAG', 'NO DIAG', 'no diag', 'N° DIAG', 'NRO DIAG', 'report_number', 'N° Informe', 'N° INFORME'
+      )
 
-      const parsedPayload = {
-        fr_number: frValue,
-        client_name: clientNameValue,
-        service_type: serviceTypeValue,
-        brand: brandValue,
-        model: modelValue,
-        serial_number: serialValue,
-        report_number: reportNumberValue || null,
-        client_report: clientReportValue || null,
-        accessories: accessoriesValue || null,
-        condition_in: conditionValue || null,
-        additional_observations: observationsValue || null,
-      }
+      const clientNameValue = readField(row,
+        'CLIENTE', 'Cliente', 'cliente', 'client_name'
+      ).toUpperCase()
 
-      // Validar con Zod
-      const validationResult = importRowSchema.safeParse(parsedPayload)
-      if (!validationResult.success) {
-        const errorDetails = validationResult.error
-        const firstErrorMsg = errorDetails.issues[0]?.message || 'Datos de fila inválidos o tipo de servicio incorrecto'
-        errorsList.push({
-          row: rowNumber,
-          fr: frValue || null,
-          reason: firstErrorMsg,
-        })
+      const brandValue = readField(row,
+        'MARCA', 'Marca', 'marca', 'brand'
+      ).toUpperCase()
+
+      const modelValue = readField(row,
+        'MODELO', 'Modelo', 'modelo', 'model'
+      ).toUpperCase()
+
+      // Serial: si está vacío → "N/S"
+      const serialRaw = readField(row,
+        'NUMERO DE SERIE', 'Numero de Serie', 'N° Serie', 'N° SERIE', 'serial_number', 'SERIE', 'Serie'
+      )
+      const serialValue = serialRaw !== '' ? serialRaw.toUpperCase() : 'N/S'
+
+      const clientReportValue = readField(row,
+        'REPORTE DE CLIENTE', 'Reporte de Cliente', 'reporte_cliente', 'client_report', 'REPORTE CLIENTE'
+      )
+
+      const accessoriesValue = readField(row,
+        'ACCESORIOS', 'Accesorios', 'accesorios', 'accessories'
+      )
+
+      const conditionValue = readField(row,
+        'CONDICION', 'Condición Ingreso', 'CONDICIÓN', 'condition_in', 'condicion_ingreso', 'CONDICION INGRESO'
+      )
+
+      // ESTADO: se ignora — siempre se asigna el estado inicial del workflow
+      // FECHA DE INGRESO: se ignora — se usa la fecha actual (default de la BD)
+
+      // ─── Validación mínima ─────────────────────────────────────────────────
+      if (!frValue) {
+        errorsList.push({ row: rowNumber, fr: null, reason: 'El campo FR está vacío o no se encontró en esta fila' })
         continue
       }
 
-      const validData = validationResult.data
+      if (!clientNameValue) {
+        errorsList.push({ row: rowNumber, fr: frValue, reason: 'El campo CLIENTE está vacío' })
+        continue
+      }
 
-      // Validar duplicado localmente usando el Set
-      const frUpper = validData.fr_number.toUpperCase()
+      if (!brandValue) {
+        errorsList.push({ row: rowNumber, fr: frValue, reason: 'El campo MARCA está vacío' })
+        continue
+      }
+
+      if (!modelValue) {
+        errorsList.push({ row: rowNumber, fr: frValue, reason: 'El campo MODELO está vacío' })
+        continue
+      }
+
+      // ─── Verificar duplicado en memoria ────────────────────────────────────
+      const frUpper = frValue
       if (existingFrSet.has(frUpper)) {
         skippedCount++
-        errorsList.push({
-          row: rowNumber,
-          fr: validData.fr_number,
-          reason: 'Ya existe en el sistema',
-        })
+        errorsList.push({ row: rowNumber, fr: frUpper, reason: 'Ya existe en el sistema (omitido)' })
         continue
       }
 
-      // Agregar a la lista para inserción masiva
+      // Agregar a la lista de inserción
       recordsToInsert.push({
-        fr_number: frUpper,
-        client_name: validData.client_name.toUpperCase(),
-        service_type: validData.service_type,
-        brand: validData.brand.toUpperCase(),
-        model: validData.model.toUpperCase(),
-        serial_number: validData.serial_number.toUpperCase(),
-        report_number: validData.report_number ? validData.report_number.toUpperCase() : null,
-        client_report: validData.client_report ? validData.client_report.toUpperCase() : null,
-        accessories: validData.accessories ? validData.accessories.toUpperCase() : null,
-        condition_in: validData.condition_in ? validData.condition_in.toUpperCase() : null,
-        additional_observations: validData.additional_observations ? validData.additional_observations.toUpperCase() : null,
-        current_status_id: initialState.id,
-        created_by: user.id,
+        fr_number:               frUpper,
+        client_name:             clientNameValue,
+        service_type:            'REVISION_GENERAL', // Tipo por defecto ya que el Excel no lo incluye
+        brand:                   brandValue,
+        model:                   modelValue,
+        serial_number:           serialValue,
+        report_number:           reportNumberValue !== '' ? reportNumberValue.toUpperCase() : '--',
+        client_report:           clientReportValue  !== '' ? clientReportValue.toUpperCase()  : '--',
+        accessories:             accessoriesValue   !== '' ? accessoriesValue.toUpperCase()   : '--',
+        condition_in:            conditionValue     !== '' ? conditionValue.toUpperCase()     : '--',
+        additional_observations: null,
+        current_status_id:       initialState.id,
+        created_by:              user.id,
       })
 
-      // Agregar al Set temporal para prevenir duplicados dentro del mismo Excel
+      // Registrar en el set para evitar duplicados internos dentro del mismo Excel
       existingFrSet.add(frUpper)
     }
 
-    // Realizar inserción masiva (bulk insert)
+    // ─── Inserción masiva (bulk insert) ────────────────────────────────────────
     if (recordsToInsert.length > 0) {
       const { error: insertError } = await (supabase
         .from('equipment_records') as any)
@@ -184,7 +193,7 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error('[POST /api/equipment/import] Bulk insert error:', insertError)
-        return NextResponse.json({ success: false, error: 'Error al guardar los registros en la base de datos' }, { status: 500 })
+        return NextResponse.json({ success: false, error: 'Error al guardar los registros en la base de datos: ' + insertError.message }, { status: 500 })
       }
       importedCount = recordsToInsert.length
     }
@@ -197,8 +206,9 @@ export async function POST(request: NextRequest) {
         errors: errorsList,
       },
     })
-  } catch (err) {
+
+  } catch (err: any) {
     console.error('[POST /api/equipment/import] Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Error interno al importar los datos' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Error interno al importar los datos: ' + (err?.message || '') }, { status: 500 })
   }
 }
