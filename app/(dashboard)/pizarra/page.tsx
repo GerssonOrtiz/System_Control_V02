@@ -82,17 +82,10 @@ export default function PizarraPage() {
         <PizarraBoard />
       </main>
 
-      {/* ─── Leyenda ─── */}
-      <footer className="flex gap-6 px-6 py-3 bg-bg-surface/50 border-t border-border-subtle flex-shrink-0 text-[10px] text-text-muted uppercase tracking-wider items-center">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded border border-red-500 bg-red-500/20 shadow-neon-red inline-block animate-pulse" />
-          Equipo atrasado (+5 días)
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded border border-neon-blue bg-neon-blue/20 inline-block" />
-          Equipo en proceso
-        </div>
-        <span className="ml-auto">© CABELAB v2.0</span>
+      {/* ─── Footer ─── */}
+      <footer className="flex justify-between px-6 py-3 bg-bg-surface/50 border-t border-border-subtle flex-shrink-0 text-[10px] text-text-muted uppercase tracking-wider items-center font-mono">
+        <span>Monitor de Taller Activo — Pizarra v2.0</span>
+        <span>© CABELAB</span>
       </footer>
     </div>
   )

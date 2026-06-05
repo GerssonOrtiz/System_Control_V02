@@ -60,7 +60,7 @@ export default function PizarraBoard() {
             return (
               <div
                 key={col.id}
-                className="flex-shrink-0 w-80 bg-bg-surface/30 border border-border-subtle/80 rounded-xl p-4 flex flex-col max-h-full"
+                className="flex-1 min-w-0 bg-bg-surface/30 border border-border-subtle/80 rounded-xl p-4 flex flex-col max-h-full"
               >
                 {/* Column Header */}
                 <div className="flex justify-between items-center pb-2 border-b border-border-subtle/60 mb-3">
@@ -108,7 +108,7 @@ export default function PizarraBoard() {
             return (
               <div
                 key={col.id}
-                className="flex-shrink-0 w-80 bg-bg-surface/30 border border-border-subtle/80 rounded-xl p-4 flex flex-col max-h-full"
+                className="flex-1 min-w-0 bg-bg-surface/30 border border-border-subtle/80 rounded-xl p-4 flex flex-col max-h-full"
               >
                 {/* Column Header */}
                 <div className="flex justify-between items-center pb-2 border-b border-border-subtle/60 mb-3">
