@@ -38,11 +38,23 @@ export default function PizarraBoard() {
 
   const diagCols = orderedDiagNames
     .map(name => columns.find(c => c.name.trim().toUpperCase() === name.toUpperCase()))
-    .filter(Boolean) as any[]
+    .filter(Boolean)
+    .filter(col => {
+      if (col.name === 'En espera de repuesto') {
+        return (groupedByStatus[col.name]?.length || 0) > 0
+      }
+      return true
+    }) as any[]
 
   const servCols = orderedServNames
     .map(name => columns.find(c => c.name.trim().toUpperCase() === name.toUpperCase()))
-    .filter(Boolean) as any[]
+    .filter(Boolean)
+    .filter(col => {
+      if (col.name === 'En espera de repuesto adicional') {
+        return (groupedByStatus[col.name]?.length || 0) > 0
+      }
+      return true
+    }) as any[]
 
   return (
     <div className="space-y-6 h-[calc(100vh-200px)] flex flex-col min-w-full">

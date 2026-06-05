@@ -49,8 +49,10 @@ function LimaClock() {
 }
 
 export default function PizarraPage() {
-  return (
-    <div className="flex flex-col min-h-screen bg-bg-base font-sans text-text-primary">
+  const [isKioskMode, setIsKioskMode] = useState(false)
+
+  const content = (
+    <div className={`flex flex-col bg-bg-base font-sans text-text-primary ${isKioskMode ? 'fixed inset-0 z-[9999]' : 'min-h-screen'}`}>
       {/* ─── Header Pizarra ─── */}
       <header className="flex justify-between items-center px-6 py-4 bg-bg-surface border-b border-border-subtle flex-shrink-0">
         {/* Logo + título */}
@@ -66,8 +68,18 @@ export default function PizarraPage() {
           </div>
         </div>
 
-        {/* Reloj Lima */}
-        <LimaClock />
+        {/* Acciones de Pizarra */}
+        <div className="flex items-center gap-6">
+          <button
+            onClick={() => setIsKioskMode(!isKioskMode)}
+            className="px-4 py-2 bg-bg-base border border-border-subtle hover:border-neon-blue hover:text-neon-blue rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm"
+          >
+            {isKioskMode ? '🚪 Salir Pantalla Completa' : '📺 Pantalla Completa'}
+          </button>
+          
+          {/* Reloj Lima */}
+          <LimaClock />
+        </div>
       </header>
 
       {/* ─── Indicadores rápidos ─── */}
@@ -89,4 +101,6 @@ export default function PizarraPage() {
       </footer>
     </div>
   )
+
+  return content
 }
