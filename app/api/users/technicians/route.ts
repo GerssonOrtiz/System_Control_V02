@@ -36,11 +36,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Error al obtener técnicos' }, { status: 500 })
     }
 
+    const activeTechs = (techs || []) as Array<{ id: number; name: string }>
+
     // Mapear para compatibilidad con el frontend (username -> name)
-    const formattedTechs = techs?.map(t => ({
+    const formattedTechs = activeTechs.map(t => ({
       id: t.id.toString(),
       username: t.name
-    })) || []
+    }))
 
     return NextResponse.json({
       success: true,
