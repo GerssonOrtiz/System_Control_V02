@@ -25,9 +25,9 @@ export async function DELETE(
       .eq('id', id)
 
     if (error) {
-      // Si falla por integridad, desactivarlo en lugar de borrarlo
+      // Si falla por integridad (FK), desactivarlo en lugar de borrarlo
       if (error.code === '23503') {
-        await supabase.from('technicians').update({ is_active: false }).eq('id', id)
+        await (supabase.from('technicians') as any).update({ is_active: false }).eq('id', id)
         return NextResponse.json({ success: true, message: 'Técnico desactivado (tiene historial)' })
       }
       throw error
