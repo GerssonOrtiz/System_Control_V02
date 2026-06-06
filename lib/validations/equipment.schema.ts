@@ -14,7 +14,7 @@ export const createEquipmentSchema = z.object({
   accessories: z.string().optional().nullable(),
   condition_in: z.string().optional().nullable(),
   additional_observations: z.string().optional().nullable(),
-  assigned_technician_ids: z.array(z.number()).optional().default([]),
+  assigned_technician_ids: z.array(z.number()).default([]),
 })
 
 export const updateStatusSchema = z.object({
