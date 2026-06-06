@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
     if (!session) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
 
     const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', session.user.id).single()
-    if (profile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
+    const activeProfile = profile as any
+    if (activeProfile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
 
     const { data: techs, error } = await supabase
       .from('technicians')
@@ -39,7 +40,8 @@ export async function POST(request: NextRequest) {
     if (!session) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
 
     const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', session.user.id).single()
-    if (profile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
+    const activeProfile = profile as any
+    if (activeProfile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
 
     const body = await request.json()
     const { name } = body

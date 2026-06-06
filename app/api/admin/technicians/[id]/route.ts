@@ -15,7 +15,8 @@ export async function DELETE(
     if (!session) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
 
     const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', session.user.id).single()
-    if (profile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
+    const activeProfile = profile as any
+    if (activeProfile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
 
     // Borrado físico (solo si no tiene equipos asociados, si no fallará por FK - es más seguro)
     const { error } = await supabase
