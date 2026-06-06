@@ -1,34 +1,24 @@
 // components/equipment/EquipmentForm.tsx
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { createEquipmentSchema, CreateEquipmentInput } from '@/lib/validations/equipment.schema'
-import { createClient } from '@/lib/supabase/client'
 
 interface EquipmentFormProps {
   onSuccess?: () => void
   onCancel?: () => void
 }
 
-interface Technician {
-  id: number
-  name: string
-}
-
 export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [availableTechnicians, setAvailableTechnicians] = useState<Technician[]>([])
-  const supabase = createClient()
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<CreateEquipmentInput>({
     resolver: zodResolver(createEquipmentSchema),
@@ -43,39 +33,10 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
       accessories: '',
       condition_in: '',
       additional_observations: '',
-      assigned_technician_ids: [],
     },
   })
 
   const BRANDS = ["ESAB", "MILLER", "LINCOLN ELECTRIC", "DAF", "KENDE", "HYPERTHERM"]
-
-  const selectedTechIds = watch('assigned_technician_ids') || []
-
-  useEffect(() => {
-    async function fetchTechnicians() {
-      const { data, error } = await supabase
-        .from('technicians')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name')
-      
-      if (!error && data) {
-        setAvailableTechnicians(data)
-      }
-    }
-    fetchTechnicians()
-  }, [])
-
-  const toggleTechnician = (id: number) => {
-    const current = [...selectedTechIds]
-    const index = current.indexOf(id)
-    if (index > -1) {
-      current.splice(index, 1)
-    } else {
-      current.push(id)
-    }
-    setValue('assigned_technician_ids', current)
-  }
 
   const onSubmit = async (data: CreateEquipmentInput) => {
     setIsSubmitting(true)
@@ -104,7 +65,11 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-text-primary">
+    <form 
+      onSubmit={handleSubmit(onSubmit)} 
+      className="space-y-6 font-sans text-text-primary"
+      autoComplete="off"
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Ficha de Recepción */}
         <div className="space-y-1">
@@ -118,6 +83,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             className={`w-full bg-bg-base/50 border ${
               errors.fr_number ? 'border-red-500/50 focus:shadow-[0_0_8px_rgba(239,68,68,0.2)]' : 'border-border-subtle focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)]'
             } rounded-lg px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition-all font-mono`}
+            autoComplete="off"
           />
           {errors.fr_number && (
             <p className="text-red-400 text-xs mt-1">{errors.fr_number.message}</p>
@@ -136,6 +102,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             className={`w-full bg-bg-base/50 border ${
               errors.client_name ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
+            autoComplete="off"
           />
           {errors.client_name && (
             <p className="text-red-400 text-xs mt-1">{errors.client_name.message}</p>
@@ -175,6 +142,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             className={`w-full bg-bg-base/50 border ${
               errors.brand ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
+            autoComplete="off"
           />
           <datalist id="brands-list">
             {BRANDS.map(b => (
@@ -198,6 +166,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             className={`w-full bg-bg-base/50 border ${
               errors.model ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
+            autoComplete="off"
           />
           {errors.model && (
             <p className="text-red-400 text-xs mt-1">{errors.model.message}</p>
@@ -216,39 +185,11 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             className={`w-full bg-bg-base/50 border ${
               errors.serial_number ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all font-mono`}
+            autoComplete="off"
           />
           {errors.serial_number && (
             <p className="text-red-400 text-xs mt-1">{errors.serial_number.message}</p>
           )}
-        </div>
-
-        {/* Técnicos Asignados */}
-        <div className="space-y-1 md:col-span-2">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Técnicos Asignados
-          </label>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {availableTechnicians.map((tech) => {
-              const isSelected = selectedTechIds.includes(tech.id)
-              return (
-                <button
-                  key={tech.id}
-                  type="button"
-                  onClick={() => toggleTechnician(tech.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                    isSelected 
-                      ? 'bg-neon-blue/20 border-neon-blue text-neon-blue shadow-[0_0_10px_rgba(0,229,255,0.2)]' 
-                      : 'bg-bg-base/50 border-border-subtle text-text-muted hover:border-white/20'
-                  }`}
-                >
-                  {tech.name.toUpperCase()}
-                </button>
-              )
-            })}
-            {availableTechnicians.length === 0 && (
-              <span className="text-[10px] text-text-muted italic">No hay técnicos disponibles</span>
-            )}
-          </div>
         </div>
       </div>
 
@@ -263,6 +204,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             placeholder="ej: NO ENCIENDE AL PRIMER INTENTO"
             rows={3}
             className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            autoComplete="off"
           />
         </div>
 
@@ -276,6 +218,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             placeholder="ej: CABLE DE TIERRA, CARETA"
             rows={3}
             className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            autoComplete="off"
           />
         </div>
 
@@ -289,6 +232,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             placeholder="ej: GOLPE EN PANEL LATERAL"
             rows={3}
             className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            autoComplete="off"
           />
         </div>
 
@@ -302,6 +246,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             placeholder="ej: CLIENTE INDICA QUE EL PROBLEMA ES RECIENTE"
             rows={3}
             className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            autoComplete="off"
           />
         </div>
       </div>
