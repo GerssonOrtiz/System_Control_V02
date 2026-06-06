@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 export const createEquipmentSchema = z.object({
   fr_number: z.string()
-    .min(3, { message: 'El número de FR debe tener al menos 3 caracteres' })
-    .regex(/^FR-\d+$/i, { message: 'El formato de FR debe ser FR-SeguidoDeNúmeros (ej: FR-042)' }),
+    .min(1, { message: 'El número de FR es obligatorio' })
+    .max(50, { message: 'El FR no puede exceder los 50 caracteres' }),
   client_name: z.string().min(2, { message: 'El nombre del cliente es obligatorio' }),
   service_type: z.enum(['GARANTIA_CABELAB', 'GARANTIA_ESAB', 'REVISION_GENERAL']),
   brand: z.string().optional().nullable().or(z.literal('')),
@@ -14,6 +14,7 @@ export const createEquipmentSchema = z.object({
   accessories: z.string().optional().nullable(),
   condition_in: z.string().optional().nullable(),
   additional_observations: z.string().optional().nullable(),
+  assigned_technician_ids: z.array(z.number()).optional().default([]),
 })
 
 export const updateStatusSchema = z.object({

@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
         additional_observations,
         current_status_id: activeInitialState.id,
         created_by: session.user.id,
+        assigned_technician_ids: data.assigned_technician_ids || [],
       } as any)
       .select('id')
       .single()

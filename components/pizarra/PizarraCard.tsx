@@ -15,6 +15,7 @@ interface PizarraCardProps {
     diagnosis_tech_username?: string | null
     maintenance_tech_username?: string | null
     status_color?: string
+    assigned_technicians?: string[] | null
   }
 }
 
@@ -43,9 +44,23 @@ export default function PizarraCard({ equipment }: PizarraCardProps) {
             <span className="text-[11px] font-semibold text-text-primary truncate block uppercase leading-none mb-0.5">
               {equipment.client_name}
             </span>
-            <span className="text-[9px] text-text-muted truncate block uppercase tracking-tight">
-              {equipment.brand} {equipment.model}
-            </span>
+            <div className="flex items-center gap-2 overflow-hidden">
+              <span className="text-[9px] text-text-muted truncate shrink-0 uppercase tracking-tight">
+                {equipment.brand} {equipment.model}
+              </span>
+              {equipment.assigned_technicians && equipment.assigned_technicians.length > 0 && (
+                <div className="flex items-center gap-1 overflow-hidden">
+                  <span className="text-[8px] text-text-muted">•</span>
+                  <div className="flex gap-1 overflow-hidden">
+                    {equipment.assigned_technicians.map((tech, idx) => (
+                      <span key={idx} className="text-[8px] font-bold text-neon-blue/80 bg-neon-blue/5 px-1 rounded border border-neon-blue/10 whitespace-nowrap">
+                        {tech.toUpperCase()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
