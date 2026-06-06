@@ -197,7 +197,7 @@ export default function StatusChangeModal({
                   onChange={(e) => {
                     setIsOverride(e.target.checked)
                     setTargetStatusId('')
-                    setSelectedTechId('')
+                    setSelectedTechIds([])
                   }}
                   className="w-4 h-4 text-neon-purple bg-bg-base border-border-subtle rounded focus:ring-neon-purple focus:ring-2 focus:ring-offset-bg-base"
                 />
