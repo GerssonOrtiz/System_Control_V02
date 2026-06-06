@@ -42,7 +42,7 @@ function LimaClock() {
         {timeStr}
       </div>
       <div className="text-text-secondary text-[11px] uppercase tracking-wide mt-0.5 capitalize">
-        {dateStr} · Lima, PE
+        {dateStr} · Arequipa, PE
       </div>
     </div>
   )
@@ -96,7 +96,7 @@ export default function PizarraPage() {
 
       {/* ─── Footer ─── */}
       <footer className="flex justify-between px-6 py-3 bg-bg-surface/50 border-t border-border-subtle flex-shrink-0 text-[10px] text-text-muted uppercase tracking-wider items-center font-mono">
-        <span>Monitor de Taller Activo — Pizarra v2.0</span>
+        <span>Monitor de Taller Activo — Pizarra</span>
         <span>© CABELAB</span>
       </footer>
     </div>

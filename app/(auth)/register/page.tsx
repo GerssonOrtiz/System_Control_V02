@@ -27,9 +27,12 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterInput) => {
     setLoading(true)
     try {
-      // 1. Crear usuario en Supabase Auth
+      // 1. Generar correo virtual si no se proporcionó uno
+      const finalEmail = data.email || `${data.username.toLowerCase()}@cabelab.local`
+
+      // 2. Crear usuario en Supabase Auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
+        email: finalEmail,
         password: data.password,
         options: {
           data: {
@@ -100,7 +103,7 @@ export default function RegisterPage() {
             CREAR CUENTA
           </h1>
           <p className="text-text-secondary text-sm mt-1">
-            Regístrate para solicitar acceso a CABELAB v2.0
+            Regístrate para solicitar acceso a CABELAB
           </p>
         </div>
 
@@ -126,7 +129,7 @@ export default function RegisterPage() {
 
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider">
-              Correo Electrónico
+              Correo Electrónico <span className="text-[10px] lowercase italic opacity-60">(Opcional)</span>
             </label>
             <input
               type="email"

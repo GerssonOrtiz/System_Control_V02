@@ -101,10 +101,10 @@ function LoginContent() {
             <span className="font-mono font-bold text-xl">CL</span>
           </div>
           <h1 className="text-2xl font-bold tracking-wider text-text-primary uppercase font-sans">
-            CABELAB <span className="text-neon-blue font-mono font-normal">v2.0</span>
+            CABELAB <span className="text-neon-blue font-mono font-normal"> SYSTEM</span>
           </h1>
           <p className="text-text-secondary text-sm mt-1">
-            Sistema operativo de control de motosoldadoras
+            Sistema operativo de control
           </p>
         </div>
 

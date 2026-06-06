@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CABELAB v2.0",
+  title: "CABELAB",
   description: "Sistema de gestión y seguimiento de equipos - CABELAB",
 };
 

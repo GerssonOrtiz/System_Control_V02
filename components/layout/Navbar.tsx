@@ -36,7 +36,7 @@ export function Navbar() {
           CL
         </div>
         <span className="font-bold tracking-wider text-sm text-text-primary uppercase">
-          CABELAB <span className="text-neon-blue font-mono font-normal">v2.0</span>
+          CABELAB <span className="text-neon-blue font-mono font-normal"></span>
         </span>
       </div>
 

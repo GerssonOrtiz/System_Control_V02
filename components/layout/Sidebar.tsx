@@ -153,7 +153,7 @@ export function Sidebar() {
             ZONA HORARIA
           </span>
           <span className="block text-xs font-semibold text-text-secondary mt-1 font-mono">
-            {isCollapsed ? 'PE' : 'America/Lima'}
+            {isCollapsed ? 'PE' : 'America/Arequipa'}
           </span>
         </div>
       </div>
