@@ -39,13 +39,16 @@ function LoginContent() {
   const onSubmit = async (data: LoginInput) => {
     setLoading(true)
     try {
+      // Usar el patrón de correo virtual: usuario@cabelab.local
+      const virtualEmail = `${data.username.toLowerCase()}@cabelab.local`
+
       const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
+        email: virtualEmail,
         password: data.password,
       })
 
       if (error) {
-        toast.error('Correo o contraseña incorrectos')
+        toast.error('Usuario o contraseña incorrectos')
         setLoading(false)
         return
       }
@@ -112,19 +115,19 @@ function LoginContent() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider">
-              Correo Electrónico
+              Nombre de Usuario
             </label>
             <input
-              type="email"
+              type="text"
               disabled={loading}
-              placeholder="ejemplo@cabelab.pe"
-              {...register('email')}
+              placeholder="nombre_usuario"
+              {...register('username')}
               className={`w-full bg-black/60 border ${
-                errors.email ? 'border-red-500/70 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)] focus:border-red-500' : 'border-white/15 focus:border-neon-blue/70 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)]'
+                errors.username ? 'border-red-500/70 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)] focus:border-red-500' : 'border-white/15 focus:border-neon-blue/70 focus:shadow-[0_0_0_3px_rgba(0,229,255,0.15)]'
               } rounded-lg text-white px-4.5 py-3 text-sm outline-none transition-standard placeholder:text-white/30`}
             />
-            {errors.email && (
-              <p className="text-xs text-red-400 font-medium">{errors.email.message}</p>
+            {errors.username && (
+              <p className="text-xs text-red-400 font-medium">{errors.username.message}</p>
             )}
           </div>
 

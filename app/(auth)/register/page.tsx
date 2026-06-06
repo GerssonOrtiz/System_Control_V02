@@ -27,16 +27,17 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterInput) => {
     setLoading(true)
     try {
-      // 1. Generar correo virtual si no se proporcionó uno
-      const finalEmail = data.email || `${data.username.toLowerCase()}@cabelab.local`
+      // Usar SIEMPRE el patrón de correo virtual para la autenticación
+      const authEmail = `${data.username.toLowerCase()}@cabelab.local`
 
       // 2. Crear usuario en Supabase Auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: finalEmail,
+        email: authEmail,
         password: data.password,
         options: {
           data: {
-            username: data.username.toLowerCase(), // Almacenar en minúsculas en metadata de auth
+            username: data.username.toLowerCase(),
+            contact_email: data.email || null, // Guardar el correo real solo como contacto
           },
         },
       })
