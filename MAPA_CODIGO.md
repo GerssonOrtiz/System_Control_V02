@@ -1,36 +1,27 @@
 # MAPA DEL CÓDIGO — CABELAB v2.0
-> Guía de navegación técnica por la estructura del proyecto.
+> Guía de navegación técnica actualizada tras la optimización del sistema de técnicos.
 
-## 1. Directorio Raíz
-*   `/app`: Núcleo de la aplicación (Next.js App Router).
-    *   `(auth)`: Rutas de login y registro.
-    *   `(dashboard)`: Rutas protegidas con Sidebar/Navbar. Incluye `/pizarra`, `/taller`, `/equipos`, e `/historial`.
-    *   `api/`: Endpoints backend que consumen el `WorkflowEngine`.
-*   `/supabase/migrations`: La inteligencia del sistema a nivel de datos.
-    *   `001_user_profiles.sql`: Define roles (enum) y perfiles vinculados a Auth.
-    *   `002_workflow.sql`: Tablas de estados y transiciones permitidas.
-    *   `003_equipment_records.sql`: Tabla principal de equipos con triggers de timestamps.
-    *   `004_status_history.sql`: Log de auditoría para cambios de estado.
-    *   `005_rls_policies.sql`: Definición de todas las políticas de seguridad por rol.
-    *   `006_seed_workflow.sql`: Carga los 8 estados iniciales y sus transiciones legales.
+## 1. Directorio Raíz y API
+*   `/app/(auth)`: `login` y `register` ahora generan y resuelven correos virtuales `@cabelab.local` automáticamente.
+*   `/app/api/admin/technicians`: Endpoints CRUD para que el Superadmin gestione el catálogo de técnicos y practicantes.
+*   `/app/api/equipment/[id]/update-status`: Lógica central de cambio de estado. Ahora maneja la asignación múltiple de técnicos (`assigned_technician_ids`).
+*   `/supabase/migrations`:
+    *   `001-006`: Infraestructura base y workflow inicial.
+    *   `007_technicians.sql`: (Actualizado) Crea la tabla maestro de técnicos y limpia la tabla `equipment_records` de columnas legacy (`diagnosis_tech_id`, etc.).
 
-## 2. Componentes Estratégicos (`/components`)
-*   `layout/Sidebar.tsx`: Gestiona la navegación dinámica basada en el rol del usuario (`SIDEBAR_ITEMS_BY_ROLE`).
-*   `pizarra/PizarraBoard.tsx`: Tablero principal con lógica de columnas por estado.
-*   `equipment/EquipmentDetail.tsx`: Vista 360° del equipo, incluye el historial cronológico.
-*   `equipment/StatusChangeModal.tsx`: Componente crítico que consulta las transiciones permitidas antes de mostrar opciones de cambio de estado.
+## 2. Componentes de UI (`/components`)
+*   `admin/TechnicianManager.tsx`: Panel de control para añadir o desactivar personal técnico.
+*   `equipment/EquipmentForm.tsx`: Registro de equipos sin autocompletado de caché y con selector de marca inteligente (datalist).
+*   `equipment/EquipmentDetail.tsx`: Ficha detallada que muestra a todos los técnicos asignados como etiquetas neón.
+*   `equipment/StatusChangeModal.tsx`: Interfaz de cambio de estado con selector de técnicos mediante etiquetas de selección múltiple.
+*   `pizarra/PizarraCard.tsx`: Tarjetas del tablero que muestran en miniatura el cliente, equipo y técnicos a cargo.
 
-## 3. Lógica y Utilidades (`/lib`)
-*   `supabase/server.ts` y `client.ts`: Configuradores del cliente Supabase para SSR y Client components respectivamente.
-*   `workflow/engine.ts`: Contiene la clase `WorkflowEngine` que valida transiciones y maneja los "force-status" del Superadmin.
-*   `validations/`: Esquemas de Zod para asegurar que los datos de equipos y usuarios sean correctos antes de entrar a la BD.
+## 3. Lógica y Validación (`/lib`)
+*   `validations/user.schema.ts`: Esquemas para login por username y registro con email opcional.
+*   `validations/equipment.schema.ts`: Esquemas optimizados que requieren estrictamente el array de técnicos en las fases operativas.
+*   `workflow/engine.ts`: Validador de transiciones y estados administrativos.
 
-## 4. Hooks Personalizados (`/hooks`)
-*   `useUser.ts`: Expone el usuario actual, su perfil y, lo más importante, su **rol** simplificado.
-*   `useRealtimePizarra.ts`: Maneja la suscripción vía WebSockets a la tabla `equipment_records`. Si algo cambia en la BD, la UI se actualiza instantáneamente.
-*   `useEquipmentList.ts`: SWR hook para fetching y cacheo eficiente de listas de equipos.
-
-## 5. Archivos de Configuración
-*   `package.json`: Define el stack Next.js 16 + React 19.
-*   `middleware.ts`: Protege todas las rutas. Verifica sesión activa y si el usuario está aprobado (`is_active`).
-*   `tailwind.config.ts`: Define la paleta de colores personalizada (`bg-base`, `neon-blue`, `text-primary`).
+## 4. Hooks y Estado (`/hooks`)
+*   `useUser.ts`: Provee el perfil y rol del usuario logueado.
+*   `useRealtimePizarra.ts`: Suscripción en tiempo real a cambios en equipos para actualización instantánea del tablero.
+*   `useEquipmentList.ts`: Gestión de caché y fetching de datos de equipos.
