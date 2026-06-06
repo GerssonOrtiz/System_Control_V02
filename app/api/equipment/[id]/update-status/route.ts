@@ -41,7 +41,7 @@ export async function POST(
       )
     }
 
-    const { new_status_id, diagnosis_tech_id, maintenance_tech_id, notes } = parsed.data
+    const { new_status_id, diagnosis_tech_id, maintenance_tech_id, assigned_technician_ids, notes } = parsed.data
 
     // 4. Verificar existencia de equipo
     const { data: equipment, error: eqError } = await supabase
@@ -87,32 +87,30 @@ export async function POST(
     }
 
     // 8. Validaciones específicas del negocio e ingresos de campos condicionales
-    // 'En diagnóstico' = ID o Nombre. Buscamos por nombre para que el motor sea dinámico.
-    if (activeTargetState.name.trim().toLowerCase() === 'en diagnóstico') {
-      if (!diagnosis_tech_id) {
+    const isDiagnosis = activeTargetState.name.trim().toLowerCase() === 'en diagnóstico'
+    const isMaintenance = activeTargetState.name.trim().toLowerCase() === 'en mantenimiento'
+
+    if (isDiagnosis || isMaintenance) {
+      const hasTechs = (assigned_technician_ids && assigned_technician_ids.length > 0) || diagnosis_tech_id || maintenance_tech_id
+      if (!hasTechs) {
         return NextResponse.json({ success: false, error: 'El técnico asignado es requerido para cambiar a este estado' }, { status: 400 })
       }
     }
 
-    if (activeTargetState.name.trim().toLowerCase() === 'en mantenimiento') {
-      if (!maintenance_tech_id) {
-        return NextResponse.json({ success: false, error: 'El técnico de mantenimiento es requerido para iniciar la fase de servicio' }, { status: 400 })
-      }
-    }
-
     // 9. Actualizar el equipo en la BD
-    // Los triggers automáticos 'auto_log_status_change' y 'auto_track_timestamps' se encargarán del historial y de los timestamps
-    // Pero como estamos enviando campos de técnicos de forma opcional, debemos estructurar el update
     const updateData: Record<string, any> = {
       current_status_id: new_status_id,
       additional_observations: notes?.trim().toUpperCase() || null,
     }
 
-    if (diagnosis_tech_id) {
-      updateData.diagnosis_tech_id = diagnosis_tech_id
-    }
-    if (maintenance_tech_id) {
-      updateData.maintenance_tech_id = maintenance_tech_id
+    // Priorizar el nuevo sistema de múltiples técnicos
+    if (assigned_technician_ids && assigned_technician_ids.length > 0) {
+      updateData.assigned_technician_ids = assigned_technician_ids
+    } else if (diagnosis_tech_id || maintenance_tech_id) {
+      const techId = parseInt((diagnosis_tech_id || maintenance_tech_id) as string, 10)
+      if (!isNaN(techId)) {
+        updateData.assigned_technician_ids = [techId]
+      }
     }
 
     const { error: updateError } = await (supabase

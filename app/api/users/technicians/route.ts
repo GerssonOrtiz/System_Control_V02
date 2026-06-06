@@ -24,22 +24,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Cuenta no activa' }, { status: 403 })
     }
 
-    // 3. Obtener técnicos usando el cliente Admin (para bypass de RLS de perfiles ajenos)
-    const adminSupabase = createAdminClient()
-    const { data: techs, error } = await adminSupabase
-      .from('user_profiles')
-      .select('id, username, role')
+    // 3. Obtener técnicos de la nueva tabla de personal
+    const { data: techs, error } = await supabase
+      .from('technicians')
+      .select('id, name')
       .eq('is_active', true)
-      .in('role', ['operaciones', 'admin', 'superadmin'])
+      .order('name')
 
     if (error) {
       console.error('[GET /api/users/technicians] Database error:', error)
       return NextResponse.json({ success: false, error: 'Error al obtener técnicos' }, { status: 500 })
     }
 
+    // Mapear para compatibilidad con el frontend (username -> name)
+    const formattedTechs = techs?.map(t => ({
+      id: t.id.toString(),
+      username: t.name
+    })) || []
+
     return NextResponse.json({
       success: true,
-      data: techs || []
+      data: formattedTechs
     })
 
   } catch (err) {

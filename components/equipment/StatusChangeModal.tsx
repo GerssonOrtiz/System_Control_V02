@@ -30,7 +30,7 @@ export default function StatusChangeModal({
 }: StatusChangeModalProps) {
   const { user, profile, role } = useUser()
   const [targetStatusId, setTargetStatusId] = useState<string>('')
-  const [selectedTechId, setSelectedTechId] = useState<string>('')
+  const [selectedTechIds, setSelectedTechIds] = useState<number[]>([])
   const [notes, setNotes] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -40,7 +40,7 @@ export default function StatusChangeModal({
   const [overrideReason, setOverrideReason] = useState('')
 
   // Technicians list
-  const [techs, setTechs] = useState<Array<{ id: string; username: string }>>([])
+  const [techs, setTechs] = useState<Array<{ id: number; username: string }>>([])
   const [loadingTechs, setLoadingTechs] = useState(false)
 
   // Target state object
@@ -61,7 +61,12 @@ export default function StatusChangeModal({
         .then((res) => res.json())
         .then((data) => {
           if (data.success) {
-            setTechs(data.data || [])
+            // Mapeamos de vuelta a id numérico ya que la API lo manda como string para compatibilidad legacy
+            const formatted = (data.data || []).map((t: any) => ({
+              id: parseInt(t.id, 10),
+              username: t.username
+            }))
+            setTechs(formatted)
           }
         })
         .catch((err) => console.error('Error loading techs:', err))
@@ -87,12 +92,18 @@ export default function StatusChangeModal({
   useEffect(() => {
     if (isOpen) {
       setTargetStatusId('')
-      setSelectedTechId('')
+      setSelectedTechIds([])
       setNotes('')
       setIsOverride(false)
       setOverrideReason('')
     }
   }, [isOpen])
+
+  const toggleTechnician = (id: number) => {
+    setSelectedTechIds(prev => 
+      prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,8 +112,8 @@ export default function StatusChangeModal({
       return
     }
 
-    if (requiresTech && !selectedTechId) {
-      toast.error('Debe asignar un técnico')
+    if (requiresTech && selectedTechIds.length === 0) {
+      toast.error('Debe asignar al menos un técnico')
       return
     }
 
@@ -126,8 +137,9 @@ export default function StatusChangeModal({
         : {
             new_status_id: parseInt(targetStatusId, 10),
             notes: notes,
-            diagnosis_tech_id: isTargetDiagnosis ? selectedTechId : null,
-            maintenance_tech_id: isTargetMaintenance ? selectedTechId : null,
+            diagnosis_tech_id: isTargetDiagnosis ? selectedTechIds[0].toString() : null, // Legacy support
+            maintenance_tech_id: isTargetMaintenance ? selectedTechIds[0].toString() : null, // Legacy support
+            assigned_technician_ids: selectedTechIds, // New multi-tech support
           }
 
       const response = await fetch(endpoint, {
@@ -225,25 +237,36 @@ export default function StatusChangeModal({
 
             {/* Asignación de Técnico Condicional */}
             {requiresTech && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                  {isTargetDiagnosis ? 'Asignar Técnico de Diagnóstico *' : 'Asignar Técnico de Mantenimiento *'}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
+                  {isTargetDiagnosis ? 'Asignar Técnico(s) de Diagnóstico *' : 'Asignar Técnico(s) de Mantenimiento *'}
                 </label>
-                <select
-                  value={selectedTechId}
-                  onChange={(e) => setSelectedTechId(e.target.value)}
-                  required
-                  className="w-full bg-bg-base/50 border border-border-subtle rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all"
-                >
-                  <option value="" disabled>
-                    {loadingTechs ? 'Cargando técnicos...' : 'Seleccione un técnico...'}
-                  </option>
-                  {techs.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.username}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-wrap gap-2 p-1">
+                  {loadingTechs ? (
+                    <span className="text-[10px] text-text-muted animate-pulse font-mono">Cargando personal...</span>
+                  ) : (
+                    techs.map((t) => {
+                      const isSelected = selectedTechIds.includes(t.id)
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => toggleTechnician(t.id)}
+                          className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${
+                            isSelected 
+                              ? 'bg-neon-blue/20 border-neon-blue text-neon-blue shadow-[0_0_10px_rgba(0,229,255,0.2)]' 
+                              : 'bg-bg-base/50 border-border-subtle text-text-muted hover:border-white/20'
+                          }`}
+                        >
+                          {t.username.toUpperCase()}
+                        </button>
+                      )
+                    })
+                  )}
+                  {!loadingTechs && techs.length === 0 && (
+                    <span className="text-[10px] text-red-400 font-mono">No se encontró personal activo</span>
+                  )}
+                </div>
               </div>
             )}
 
