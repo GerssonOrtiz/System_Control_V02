@@ -18,8 +18,6 @@ export const createEquipmentSchema = z.object({
 
 export const updateStatusSchema = z.object({
   new_status_id: z.number().int({ message: 'ID de estado inválido' }),
-  diagnosis_tech_id: z.string().optional().nullable(),
-  maintenance_tech_id: z.string().optional().nullable(),
   assigned_technician_ids: z.array(z.number()).optional(),
   notes: z.string().optional().nullable(),
 })

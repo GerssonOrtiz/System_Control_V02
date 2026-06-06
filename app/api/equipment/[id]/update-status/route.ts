@@ -41,7 +41,7 @@ export async function POST(
       )
     }
 
-    const { new_status_id, diagnosis_tech_id, maintenance_tech_id, assigned_technician_ids, notes } = parsed.data
+    const { new_status_id, assigned_technician_ids, notes } = parsed.data
 
     // 4. Verificar existencia de equipo
     const { data: equipment, error: eqError } = await supabase
@@ -86,13 +86,12 @@ export async function POST(
       return NextResponse.json({ success: false, error: validation.error || 'Transición de estado no permitida' }, { status: 422 })
     }
 
-    // 8. Validaciones específicas del negocio e ingresos de campos condicionales
+    // 8. Validaciones específicas del negocio
     const isDiagnosis = activeTargetState.name.trim().toLowerCase() === 'en diagnóstico'
     const isMaintenance = activeTargetState.name.trim().toLowerCase() === 'en mantenimiento'
 
     if (isDiagnosis || isMaintenance) {
-      const hasTechs = (assigned_technician_ids && assigned_technician_ids.length > 0) || diagnosis_tech_id || maintenance_tech_id
-      if (!hasTechs) {
+      if (!assigned_technician_ids || assigned_technician_ids.length === 0) {
         return NextResponse.json({ success: false, error: 'El técnico asignado es requerido para cambiar a este estado' }, { status: 400 })
       }
     }
@@ -103,14 +102,8 @@ export async function POST(
       additional_observations: notes?.trim().toUpperCase() || null,
     }
 
-    // Priorizar el nuevo sistema de múltiples técnicos
     if (assigned_technician_ids && assigned_technician_ids.length > 0) {
       updateData.assigned_technician_ids = assigned_technician_ids
-    } else if (diagnosis_tech_id || maintenance_tech_id) {
-      const techId = parseInt((diagnosis_tech_id || maintenance_tech_id) as string, 10)
-      if (!isNaN(techId)) {
-        updateData.assigned_technician_ids = [techId]
-      }
     }
 
     const { error: updateError } = await (supabase

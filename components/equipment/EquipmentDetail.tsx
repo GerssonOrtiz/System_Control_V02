@@ -299,13 +299,17 @@ export default function EquipmentDetail({
                   </div>
 
                   <div className="space-y-3">
-                    <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1">Técnicos Asignados</h3>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <span className="text-text-secondary font-semibold uppercase">Diagnóstico:</span>
-                      <span className="col-span-2">{equipment.diagnosis_tech_username || 'SIN ASIGNAR'}</span>
-
-                      <span className="text-text-secondary font-semibold uppercase">Mantenimiento:</span>
-                      <span className="col-span-2">{equipment.maintenance_tech_username || 'SIN ASIGNAR'}</span>
+                    <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1">Personal Asignado</h3>
+                    <div className="flex flex-wrap gap-2 py-1">
+                      {equipment.assigned_technicians && equipment.assigned_technicians.length > 0 ? (
+                        equipment.assigned_technicians.map((tech: string, idx: number) => (
+                          <span key={idx} className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-neon-blue/10 border border-neon-blue/20 text-neon-blue uppercase shadow-[0_0_10px_rgba(0,229,255,0.05)]">
+                            {tech}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-text-muted italic">SIN PERSONAL ASIGNADO</span>
+                      )}
                     </div>
 
                     <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1 pt-2">Tiempos Operativos</h3>

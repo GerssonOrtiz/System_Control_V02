@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { useUser } from '@/hooks/useUser'
 import { toast } from 'sonner'
+import TechnicianManager from '@/components/admin/TechnicianManager'
 
 export default function AdminUsuariosPage() {
   const { role, loading: userLoading } = useUser()
@@ -282,6 +283,9 @@ export default function AdminUsuariosPage() {
           )}
         </div>
       )}
+
+      {/* 👤 GESTIÓN DE PERSONAL TÉCNICO */}
+      <TechnicianManager />
 
       {loading ? (
         <div className="text-center py-12 text-sm text-neon-blue font-mono tracking-widest animate-pulse">
