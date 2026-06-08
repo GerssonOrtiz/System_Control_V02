@@ -7,14 +7,14 @@ export const createEquipmentSchema = z.object({
     .max(50, { message: 'El FR no puede exceder los 50 caracteres' }),
   client_name: z.string().min(2, { message: 'El nombre del cliente es obligatorio' }),
   service_type: z.enum(['GARANTIA_CABELAB', 'GARANTIA_ESAB', 'REVISION_GENERAL']),
-  brand: z.string().optional().nullable().or(z.literal('')),
-  model: z.string().optional().nullable().or(z.literal('')),
-  serial_number: z.string().optional().nullable().or(z.literal('')),
-  client_report: z.string().optional().nullable().or(z.literal('')),
+  brand: z.string().optional().nullable(),
+  model: z.string().optional().nullable(),
+  serial_number: z.string().optional().nullable(),
+  client_report: z.string().optional().nullable(),
   accessories: z.string().optional().nullable(),
   condition_in: z.string().optional().nullable(),
   additional_observations: z.string().optional().nullable(),
-  is_priority: z.boolean().default(false),
+  is_priority: z.boolean().optional(),
 })
 
 export const updateStatusSchema = z.object({
@@ -29,6 +29,18 @@ export const forceStatusSchema = z.object({
   override_reason: z.string().min(5, { message: 'El motivo del override debe tener al menos 5 caracteres' }),
 })
 
-export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>
+export type CreateEquipmentInput = {
+  fr_number: string
+  client_name: string
+  service_type: 'GARANTIA_CABELAB' | 'GARANTIA_ESAB' | 'REVISION_GENERAL'
+  brand?: string | null
+  model?: string | null
+  serial_number?: string | null
+  client_report?: string | null
+  accessories?: string | null
+  condition_in?: string | null
+  additional_observations?: string | null
+  is_priority?: boolean
+}
 export type UpdateStatusInput = z.infer<typeof updateStatusSchema>
 export type ForceStatusInput = z.infer<typeof forceStatusSchema>
