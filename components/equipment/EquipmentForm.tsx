@@ -33,6 +33,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
       accessories: '',
       condition_in: '',
       additional_observations: '',
+      is_priority: false,
     },
   })
 
