@@ -57,6 +57,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '0', 10)
     const includeDelivered = searchParams.get('include_delivered') === 'true'
+    const statusFilter = searchParams.get('status')
+    const serviceFilter = searchParams.get('service_type')
     const pageSize = 20
 
     // 4. Construir consulta sobre la vista equipment_with_status
@@ -76,12 +78,21 @@ export async function GET(request: NextRequest) {
       query = query.eq('is_terminal', false)
     }
 
+    // Filtros dinámicos (Server-side)
+    if (statusFilter) {
+      query = query.eq('status_name', statusFilter)
+    }
+    if (serviceFilter) {
+      query = query.eq('service_type', serviceFilter)
+    }
+
     // Paginación
     const from = page * pageSize
     const to = from + pageSize - 1
     
+    // Ordenar por FR más reciente (descendente)
     const { data: equipments, count, error } = await query
-      .order('date_in', { ascending: false })
+      .order('fr_number', { ascending: false })
       .range(from, to)
 
     if (error) {

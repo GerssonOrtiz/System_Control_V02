@@ -3,12 +3,18 @@ import useSWR from 'swr'
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
-export function useEquipmentList(page: number = 0, includeDelivered: boolean = false) {
-  const { data, error, mutate, isLoading } = useSWR(
-    `/api/equipment?page=${page}&include_delivered=${includeDelivered}`,
-    fetcher
-  )
+export function useEquipmentList(
+  page: number = 0,
+  includeDelivered: boolean = false,
+  status?: string,
+  serviceType?: string
+) {
+  let url = `/api/equipment?page=${page}&include_delivered=${includeDelivered}`
+  if (status) url += `&status=${encodeURIComponent(status)}`
+  if (serviceType) url += `&service_type=${encodeURIComponent(serviceType)}`
 
+  const { data, error, mutate, isLoading } = useSWR(url, fetcher)
+...
   return {
     equipments: data?.data?.equipments || [],
     total: data?.data?.total || 0,

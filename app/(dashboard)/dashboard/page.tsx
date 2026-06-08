@@ -4,99 +4,65 @@
 import React, { useState } from 'react'
 import { useDashboardStats, useEquipmentList } from '@/hooks/useEquipmentList'
 import EquipmentTable from '@/components/equipment/EquipmentTable'
-import StatusBadge from '@/components/equipment/StatusBadge'
 
 export default function DashboardPage() {
   const [activePage, setActivePage] = useState(0)
+  const [statusFilter, setStatusFilter] = useState('')
+  const [serviceFilter, setServiceFilter] = useState('')
+
   const { stats, isLoading: loadingStats, mutate: mutateStats } = useDashboardStats()
-  const { equipments, total, totalPages, isLoading: loadingEquips, mutate: mutateEquips } = useEquipmentList(activePage, true)
+  const { equipments, total, totalPages, isLoading: loadingEquips, mutate: mutateEquips } = useEquipmentList(
+    activePage,
+    true,
+    statusFilter,
+    serviceFilter
+  )
 
   const handleUpdateSuccess = () => {
     mutateStats()
     mutateEquips()
   }
 
-  // Filter states
-  const [statusFilter, setStatusFilter] = useState('')
-  const [serviceFilter, setServiceFilter] = useState('')
+  // Lista de estados para el filtro (podría venir de una tabla maestra en el futuro)
+  const statusOptions = [
+    'En espera de diagnóstico', 
+    'En diagnóstico', 
+    'Pendiente de aprobación', 
+    'Aprobado', 
+    'En mantenimiento', 
+    'En espera de repuesto', 
+    'En espera de repuesto adicional', 
+    'Control de calidad', 
+    'Listo para entrega', 
+    'Entregado', 
+    'REVISION', 
+    'PRESTAMO'
+  ]
 
-  // Apply filters locally on the fetched page of equipments
-  const filteredEquipments = equipments.filter((eq: any) => {
-    const matchStatus = statusFilter ? eq.status_name === statusFilter : true
-    const matchService = serviceFilter ? eq.service_type === serviceFilter : true
-    return matchStatus && matchService
-  })
-
-  // Get unique statuses and service types from current page for filtering options
-  const statusOptions = Array.from(new Set(equipments.map((eq: any) => eq.status_name)))
-  const serviceOptions = Array.from(new Set(equipments.map((eq: any) => eq.service_type)))
+  const serviceOptions = ['REVISION_GENERAL', 'GARANTIA_CABELAB', 'GARANTIA_ESAB']
 
   return (
     <div className="space-y-6 font-sans text-text-primary p-6">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-neon-blue tracking-wider uppercase">📊 Dashboard Administrativo</h1>
-        <p className="text-text-secondary text-xs mt-1">Monitoreo global de equipos, métricas de rendimiento y registro histórico.</p>
+        <p className="text-text-secondary text-xs mt-1">Métricas globales y registro histórico de toda la base de datos.</p>
       </div>
 
-      {/* Main Global Equipment Section - NOW AT TOP */}
-      <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="space-y-1">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-neon-blue">📋 Registro General de Equipos ({total})</h2>
-            <p className="text-[10px] text-text-muted">Incluye equipos activos, entregados y en revisión.</p>
-          </div>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
-            >
-              <option value="">Todos los Estados</option>
-              {statusOptions.map((opt: any) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-            <select
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
-            >
-              <option value="">Todos los Servicios</option>
-              {serviceOptions.map((opt: any) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Equipment Table */}
-        {loadingEquips ? (
-          <div className="flex justify-center items-center py-12">
-            <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">Cargando base de datos completa...</span>
-          </div>
-        ) : (
-          <EquipmentTable
-            equipments={filteredEquipments}
-            currentPage={activePage}
-            totalPages={totalPages}
-            onPageChange={setActivePage}
-            onUpdateSuccess={handleUpdateSuccess}
-          />
-        )}
-      </div>
-
-      {/* Stats Grid */}
+      {/* Stats Grid - AT TOP */}
       {loadingStats ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="bg-bg-surface border border-border-subtle rounded-xl p-5 h-24 animate-pulse" />
           ))}
         </div>
       ) : stats ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+          {/* Total Registrados */}
+          <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 shadow-[0_0_12px_rgba(255,255,255,0.02)] hover:border-text-primary/20 transition-all">
+            <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Total en Base de Datos</span>
+            <div className="text-2xl font-bold text-text-primary mt-1 font-mono">{stats.total_registered}</div>
+          </div>
           {/* Activos */}
           <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 shadow-[0_0_12px_rgba(0,229,255,0.03)] hover:border-neon-blue/20 transition-all">
             <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Equipos Activos</span>
@@ -114,11 +80,60 @@ export default function DashboardPage() {
           </div>
           {/* Tiempo promedio */}
           <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 shadow-[0_0_12px_rgba(157,78,221,0.03)] hover:border-neon-purple/20 transition-all">
-            <span className="text-[10px] font-bold text-neon-purple uppercase tracking-wider">Promedio Días de Entrega</span>
+            <span className="text-[10px] font-bold text-neon-purple uppercase tracking-wider">Promedio Entrega</span>
             <div className="text-2xl font-bold text-neon-purple mt-1 font-mono">{stats.avg_days_to_delivery}d</div>
           </div>
         </div>
       ) : null}
+
+      {/* Main Global Equipment Section */}
+      <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-neon-blue">📋 Registro General de Equipos ({total})</h2>
+            <p className="text-[10px] text-text-muted">Filtrando en toda la base de datos. Ordenado por FR más reciente.</p>
+          </div>
+          
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setActivePage(0); }}
+              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+            >
+              <option value="">Todos los Estados</option>
+              {statusOptions.map((opt: any) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <select
+              value={serviceFilter}
+              onChange={(e) => { setServiceFilter(e.target.value); setActivePage(0); }}
+              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+            >
+              <option value="">Todos los Servicios</option>
+              {serviceOptions.map((opt: any) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Equipment Table */}
+        {loadingEquips ? (
+          <div className="flex justify-center items-center py-12">
+            <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">Cargando base de datos completa...</span>
+          </div>
+        ) : (
+          <EquipmentTable
+            equipments={equipments}
+            currentPage={activePage}
+            totalPages={totalPages}
+            onPageChange={setActivePage}
+            onUpdateSuccess={handleUpdateSuccess}
+          />
+        )}
+      </div>
 
       {/* Alerta Equipos Atrasados */}
       {stats && stats.delayed_equipment && stats.delayed_equipment.length > 0 && (

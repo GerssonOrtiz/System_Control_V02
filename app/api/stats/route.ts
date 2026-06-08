@@ -24,27 +24,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Cuenta no activa' }, { status: 403 })
     }
 
-    // 3. Validar roles permitidos: superadmin, admin, visualizador
+    // 3. Validar roles permitidos
     const allowedRoles = ['superadmin', 'admin', 'visualizador']
     if (!allowedRoles.includes(activeProfile.role)) {
-      return NextResponse.json({ success: false, error: 'Acceso denegado. Rol no autorizado para ver estadísticas' }, { status: 403 })
+      return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
     }
 
-    // 4. Obtener equipos activos (is_terminal = false) de la vista
-    const { data: activeEquips, error: activeErr } = await supabase
+    // 4. Obtener equipos (TODOS) de la vista para estadísticas globales
+    const { data: allEquips, error: allErr } = await supabase
       .from('equipment_with_status')
-      .select('id, fr_number, client_name, status_name, status_color, service_type, days_elapsed, brand, assigned_technicians')
-      .eq('is_terminal', false)
+      .select('id, fr_number, client_name, status_name, status_color, service_type, days_elapsed, brand, assigned_technicians, is_terminal')
 
-    if (activeErr) {
-      console.error('[GET /api/stats] Active equipment error:', activeErr)
-      return NextResponse.json({ success: false, error: 'Error al consultar equipos activos de la base de datos' }, { status: 500 })
+    if (allErr) {
+      console.error('[GET /api/stats] Database error:', allErr)
+      return NextResponse.json({ success: false, error: 'Error al consultar datos globales' }, { status: 500 })
     }
 
-    const activeList = (activeEquips || []) as any[]
+    const equipmentList = (allEquips || []) as any[]
+    const total_registered = equipmentList.length
+    
+    // Equipos actualmente activos (no terminales)
+    const activeList = equipmentList.filter(e => !e.is_terminal)
     const total_active = activeList.length
 
-    // Filtrar equipos con days_elapsed > 5
+    // Filtrar equipos con days_elapsed > 5 (solo activos)
     const delayedList = activeList.filter((e: any) => e.days_elapsed > 5)
     const total_delayed = delayedList.length
 
@@ -55,9 +58,9 @@ export async function GET(request: NextRequest) {
       days_elapsed: e.days_elapsed
     }))
 
-    // Agrupar por estado
+    // Agrupar por estado (Global)
     const statusCounts: Record<string, { count: number; color: string }> = {}
-    for (const e of activeList) {
+    for (const e of equipmentList) {
       if (!statusCounts[e.status_name]) {
         statusCounts[e.status_name] = { count: 0, color: e.status_color || '#6B7280' }
       }
@@ -69,9 +72,9 @@ export async function GET(request: NextRequest) {
       color: val.color
     }))
 
-    // Agrupar por tipo de servicio
+    // Agrupar por tipo de servicio (Global)
     const serviceCounts: Record<string, number> = {}
-    for (const e of activeList) {
+    for (const e of equipmentList) {
       serviceCounts[e.service_type] = (serviceCounts[e.service_type] || 0) + 1
     }
     const by_service_type = Object.entries(serviceCounts).map(([type, count]) => ({
@@ -79,18 +82,18 @@ export async function GET(request: NextRequest) {
       count
     }))
 
-    // Agrupar por Marca
+    // Agrupar por Marca (Global)
     const brandCounts: Record<string, number> = {}
-    for (const e of activeList) {
+    for (const e of equipmentList) {
       const brand = e.brand || 'SIN MARCA'
       brandCounts[brand] = (brandCounts[brand] || 0) + 1
     }
     const by_brand = Object.entries(brandCounts)
       .map(([brand, count]) => ({ brand, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5) // Top 5 marcas
+      .slice(0, 10)
 
-    // Agrupar por Técnico (Carga actual de trabajo)
+    // Agrupar por Técnico (Carga actual de trabajo - Solo Activos)
     const techCounts: Record<string, number> = {}
     for (const e of activeList) {
       if (e.assigned_technicians && Array.isArray(e.assigned_technicians)) {
@@ -113,10 +116,6 @@ export async function GET(request: NextRequest) {
       .eq('new_status', 'Entregado')
       .gte('timestamp', firstDayOfMonth)
 
-    if (delError) {
-      console.error('[GET /api/stats] Delivered this month count error:', delError)
-      // Continuar sin fallar la petición completa
-    }
     const delivered_this_month = deliveredCount || 0
 
     // 6. Promedio de días para entrega (últimos 30 días)
@@ -129,19 +128,15 @@ export async function GET(request: NextRequest) {
 
     let avg_days_to_delivery = 0
 
-    if (histErr) {
-      console.error('[GET /api/stats] History logs error:', histErr)
-    } else if (historyLogs && historyLogs.length > 0) {
+    if (historyLogs && historyLogs.length > 0) {
       const historyLogsList = historyLogs as any[]
       const eqIds = historyLogsList.map((h: any) => h.equipment_id)
-      const { data: equips, error: equipsErr } = await supabase
+      const { data: equips } = await supabase
         .from('equipment_records')
         .select('id, date_in')
         .in('id', eqIds)
 
-      if (equipsErr) {
-        console.error('[GET /api/stats] Equips fetch error:', equipsErr)
-      } else if (equips) {
+      if (equips) {
         const equipMap = new Map(equips.map((e: any) => [e.id, new Date(e.date_in).getTime()]))
         let totalDays = 0
         let countDelivered = 0
@@ -162,12 +157,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
+        total_registered,
         total_active,
         total_delayed,
         delivered_this_month,
         avg_days_to_delivery,
         by_status,
         by_service_type,
+        by_brand,
+        by_technician,
         delayed_equipment
       }
     })
