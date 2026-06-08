@@ -14,7 +14,7 @@ export function useEquipmentList(
   if (serviceType) url += `&service_type=${encodeURIComponent(serviceType)}`
 
   const { data, error, mutate, isLoading } = useSWR(url, fetcher)
-...
+
   return {
     equipments: data?.data?.equipments || [],
     total: data?.data?.total || 0,
