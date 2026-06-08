@@ -9,7 +9,7 @@ import StatusBadge from '@/components/equipment/StatusBadge'
 export default function DashboardPage() {
   const [activePage, setActivePage] = useState(0)
   const { stats, isLoading: loadingStats, mutate: mutateStats } = useDashboardStats()
-  const { equipments, total, totalPages, isLoading: loadingEquips, mutate: mutateEquips } = useEquipmentList(activePage, false)
+  const { equipments, total, totalPages, isLoading: loadingEquips, mutate: mutateEquips } = useEquipmentList(activePage, true)
 
   const handleUpdateSuccess = () => {
     mutateStats()
@@ -36,7 +36,56 @@ export default function DashboardPage() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-neon-blue tracking-wider uppercase">📊 Dashboard Administrativo</h1>
-        <p className="text-text-secondary text-xs mt-1">Monitoreo de equipos activos, métricas de rendimiento y alertas de taller.</p>
+        <p className="text-text-secondary text-xs mt-1">Monitoreo global de equipos, métricas de rendimiento y registro histórico.</p>
+      </div>
+
+      {/* Main Global Equipment Section - NOW AT TOP */}
+      <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-neon-blue">📋 Registro General de Equipos ({total})</h2>
+            <p className="text-[10px] text-text-muted">Incluye equipos activos, entregados y en revisión.</p>
+          </div>
+          
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+            >
+              <option value="">Todos los Estados</option>
+              {statusOptions.map((opt: any) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <select
+              value={serviceFilter}
+              onChange={(e) => setServiceFilter(e.target.value)}
+              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+            >
+              <option value="">Todos los Servicios</option>
+              {serviceOptions.map((opt: any) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Equipment Table */}
+        {loadingEquips ? (
+          <div className="flex justify-center items-center py-12">
+            <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">Cargando base de datos completa...</span>
+          </div>
+        ) : (
+          <EquipmentTable
+            equipments={filteredEquipments}
+            currentPage={activePage}
+            totalPages={totalPages}
+            onPageChange={setActivePage}
+            onUpdateSuccess={handleUpdateSuccess}
+          />
+        )}
       </div>
 
       {/* Stats Grid */}
@@ -106,52 +155,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-
-      {/* Main Active Equipment Section */}
-      <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-neon-blue">📋 Todos los Equipos Activos ({total})</h2>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
-            >
-              <option value="">Todos los Estados</option>
-              {statusOptions.map((opt: any) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-            <select
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
-            >
-              <option value="">Todos los Servicios</option>
-              {serviceOptions.map((opt: any) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Equipment Table */}
-        {loadingEquips ? (
-          <div className="flex justify-center items-center py-12">
-            <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">Cargando lista de equipos...</span>
-          </div>
-        ) : (
-          <EquipmentTable
-            equipments={filteredEquipments}
-            currentPage={activePage}
-            totalPages={totalPages}
-            onPageChange={setActivePage}
-            onUpdateSuccess={handleUpdateSuccess}
-          />
-        )}
-      </div>
     </div>
   )
 }

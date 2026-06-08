@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // 4. Obtener equipos activos (is_terminal = false) de la vista
     const { data: activeEquips, error: activeErr } = await supabase
       .from('equipment_with_status')
-      .select('id, fr_number, client_name, status_name, status_color, service_type, days_elapsed')
+      .select('id, fr_number, client_name, status_name, status_color, service_type, days_elapsed, brand, assigned_technicians')
       .eq('is_terminal', false)
 
     if (activeErr) {
@@ -78,6 +78,30 @@ export async function GET(request: NextRequest) {
       service_type: type,
       count
     }))
+
+    // Agrupar por Marca
+    const brandCounts: Record<string, number> = {}
+    for (const e of activeList) {
+      const brand = e.brand || 'SIN MARCA'
+      brandCounts[brand] = (brandCounts[brand] || 0) + 1
+    }
+    const by_brand = Object.entries(brandCounts)
+      .map(([brand, count]) => ({ brand, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5) // Top 5 marcas
+
+    // Agrupar por Técnico (Carga actual de trabajo)
+    const techCounts: Record<string, number> = {}
+    for (const e of activeList) {
+      if (e.assigned_technicians && Array.isArray(e.assigned_technicians)) {
+        for (const tech of e.assigned_technicians) {
+          techCounts[tech] = (techCounts[tech] || 0) + 1
+        }
+      }
+    }
+    const by_technician = Object.entries(techCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
 
     // 5. Equipos entregados este mes
     const now = new Date()
