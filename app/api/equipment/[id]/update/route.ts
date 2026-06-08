@@ -56,6 +56,7 @@ export async function PUT(
     
     if (body.service_type !== undefined) updateData.service_type = body.service_type
     if (body.date_in !== undefined) updateData.date_in = body.date_in
+    if (body.is_priority !== undefined) updateData.is_priority = body.is_priority
 
     // 5. Validaciones mínimas
     if (updateData.client_name === '') return NextResponse.json({ success: false, error: 'El cliente no puede estar vacío' }, { status: 400 })

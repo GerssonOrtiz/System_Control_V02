@@ -90,8 +90,9 @@ export async function GET(request: NextRequest) {
     const from = page * pageSize
     const to = from + pageSize - 1
     
-    // Ordenar por FR más reciente (descendente)
+    // Ordenar por prioridad primero, luego por FR más reciente (descendente)
     const { data: equipments, count, error } = await query
+      .order('is_priority', { ascending: false })
       .order('fr_number', { ascending: false })
       .range(from, to)
 

@@ -29,6 +29,7 @@ export default function EquipmentDetail({
   const [isSaving, setIsSaving] = useState(false)
 
   // Edit fields state
+  const [editIsPriority, setEditIsPriority] = useState(false)
   const [editFr, setEditFr] = useState('')
   const [editClientName, setEditClientName] = useState('')
   const [editBrand, setEditBrand] = useState('')
@@ -74,6 +75,7 @@ export default function EquipmentDetail({
     setEditSerial(equipment.serial_number || '')
     setEditReportNumber(equipment.report_number || '')
     setEditServiceType(equipment.service_type || 'REVISION_GENERAL')
+    setEditIsPriority(equipment.is_priority || false)
     if (equipment.date_in) {
       try {
         const d = new Date(equipment.date_in)
@@ -107,6 +109,7 @@ export default function EquipmentDetail({
           serial_number: editSerial,
           report_number: editReportNumber,
           service_type: editServiceType,
+          is_priority: editIsPriority,
           date_in: editDateIn ? new Date(editDateIn).toISOString() : undefined,
           client_report: editClientReport,
           accessories: editAccessories,
@@ -140,12 +143,19 @@ export default function EquipmentDetail({
           <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] max-h-[90vh] overflow-y-auto bg-bg-surface border border-neon-blue/20 rounded-xl shadow-neon-blue p-6 md:p-8 z-40 font-sans text-text-primary animate-in fade-in zoom-in-95 duration-150 scrollbar-thin">
             <Dialog.Title className="text-xl font-bold text-neon-blue mb-6 flex justify-between items-center border-b border-border-subtle pb-3">
               <span>📋 Ficha Detallada: {equipment?.fr_number || 'Cargando...'}</span>
-              <button
-                onClick={onClose}
-                className="text-text-secondary hover:text-neon-blue transition-colors text-sm font-semibold uppercase"
-              >
-                Cerrar
-              </button>
+              <div className="flex items-center gap-2">
+                {equipment?.is_priority && (
+                  <span className="bg-neon-purple/20 border border-neon-purple/50 text-neon-purple text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(157,78,221,0.3)] animate-pulse">
+                    ⭐ PRIORIDAD VIP
+                  </span>
+                )}
+                <button
+                  onClick={onClose}
+                  className="text-text-secondary hover:text-neon-blue transition-colors text-sm font-semibold uppercase"
+                >
+                  Cerrar
+                </button>
+              </div>
             </Dialog.Title>
 
             {isLoading ? (
@@ -211,12 +221,24 @@ export default function EquipmentDetail({
                     <div className="grid grid-cols-3 gap-3 text-xs items-center">
                       <span className="text-text-secondary font-semibold uppercase">Ficha (FR):</span>
                       {isEditing ? (
-                        <input
-                          type="text"
-                          value={editFr}
-                          onChange={(e) => setEditFr(e.target.value)}
-                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
-                        />
+                        <div className="col-span-2 flex items-center gap-3">
+                          <input
+                            type="text"
+                            value={editFr}
+                            onChange={(e) => setEditFr(e.target.value)}
+                            className="flex-1 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
+                          />
+                          <div className="flex items-center gap-1.5 bg-neon-purple/10 border border-neon-purple/20 px-2 py-1 rounded">
+                            <input
+                              type="checkbox"
+                              id="edit-priority"
+                              checked={editIsPriority}
+                              onChange={(e) => setEditIsPriority(e.target.checked)}
+                              className="w-3 h-3 text-neon-purple bg-bg-base border-border-subtle rounded focus:ring-neon-purple"
+                            />
+                            <label htmlFor="edit-priority" className="text-[10px] font-bold text-neon-purple uppercase cursor-pointer">VIP</label>
+                          </div>
+                        </div>
                       ) : (
                         <span className="col-span-2 font-mono font-bold text-neon-blue uppercase">{equipment.fr_number}</span>
                       )}

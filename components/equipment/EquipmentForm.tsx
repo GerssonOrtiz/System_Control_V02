@@ -71,11 +71,24 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
       autoComplete="off"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Ficha de Recepción */}
+        {/* Ficha de Recepción + Prioridad */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Ficha de Recepción (FR) *
-          </label>
+          <div className="flex justify-between items-center">
+            <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+              Ficha de Recepción (FR) *
+            </label>
+            <div className="flex items-center gap-2 px-2 py-1 bg-neon-purple/5 border border-neon-purple/20 rounded-md">
+              <input
+                type="checkbox"
+                id="is_priority"
+                {...register('is_priority')}
+                className="w-3.5 h-3.5 text-neon-purple bg-bg-base border-border-subtle rounded focus:ring-neon-purple"
+              />
+              <label htmlFor="is_priority" className="text-[10px] font-bold text-neon-purple uppercase cursor-pointer">
+                ⭐ Prioridad VIP
+              </label>
+            </div>
+          </div>
           <input
             type="text"
             {...register('fr_number')}

@@ -41,7 +41,7 @@ export async function POST(
       )
     }
 
-    const { new_status_id, assigned_technician_ids, notes } = parsed.data
+    const { new_status_id, assigned_technician_ids, notes, report_number } = parsed.data
 
     // 4. Verificar existencia de equipo
     const { data: equipment, error: eqError } = await supabase
@@ -100,6 +100,10 @@ export async function POST(
     const updateData: Record<string, any> = {
       current_status_id: new_status_id,
       additional_observations: notes?.trim().toUpperCase() || null,
+    }
+
+    if (report_number) {
+      updateData.report_number = report_number.trim().toUpperCase()
     }
 
     if (assigned_technician_ids && assigned_technician_ids.length > 0) {

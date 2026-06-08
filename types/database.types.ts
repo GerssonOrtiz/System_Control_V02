@@ -111,6 +111,7 @@ export type Database = {
           finalized_at: string | null
           updated_at: string
           assigned_technician_ids: number[]
+          is_priority: boolean
           created_by: string | null
         }
         Insert: {
@@ -137,6 +138,7 @@ export type Database = {
           finalized_at?: string | null
           updated_at?: string
           assigned_technician_ids?: number[]
+          is_priority?: boolean
           created_by?: string | null
         }
         Update: {
@@ -163,6 +165,7 @@ export type Database = {
           finalized_at?: string | null
           updated_at?: string
           assigned_technician_ids?: number[]
+          is_priority?: boolean
           created_by?: string | null
         }
       }
@@ -232,6 +235,7 @@ export type Database = {
           status_name: string
           status_color: string
           is_terminal: boolean
+          is_priority: boolean
           days_elapsed: number
           phase_1_days: number
           phase_2_days: number

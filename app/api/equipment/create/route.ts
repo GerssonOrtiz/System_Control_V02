@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
         additional_observations,
         current_status_id: activeInitialState.id,
         created_by: session.user.id,
+        is_priority: data.is_priority || false,
       } as any)
       .select('id')
       .single()

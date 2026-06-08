@@ -16,17 +16,24 @@ interface PizarraCardProps {
     maintenance_tech_username?: string | null
     status_color?: string
     assigned_technicians?: string[] | null
+    is_priority?: boolean
   }
 }
 
 export default function PizarraCard({ equipment }: PizarraCardProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
+  const cardClasses = `bg-bg-surface/60 border rounded-lg px-3 py-2 flex items-center gap-3 transition-all duration-150 group cursor-pointer shadow-sm mb-1.5 ${
+    equipment.is_priority 
+      ? 'border-neon-purple shadow-[0_0_10px_rgba(157,78,221,0.2)] hover:bg-neon-purple/5' 
+      : 'border-border-subtle hover:bg-bg-surface hover:border-neon-blue/40'
+  }`
+
   return (
     <>
       <div
         onClick={() => setIsDetailOpen(true)}
-        className="bg-bg-surface/60 border border-border-subtle rounded-lg px-3 py-2 flex items-center gap-3 transition-all duration-150 hover:bg-bg-surface hover:border-neon-blue/40 group cursor-pointer shadow-sm mb-1.5"
+        className={cardClasses}
       >
         {/* Identificador FR - Color en base a estado para referencia rápida */}
         <div 
@@ -36,9 +43,14 @@ export default function PizarraCard({ equipment }: PizarraCardProps) {
         
         {/* FR y Cliente - Información Primaria */}
         <div className="flex-1 min-w-0 flex items-center gap-4">
-          <span className="font-mono text-sm font-bold text-neon-blue uppercase tracking-wider shrink-0 w-16">
-            {equipment.fr_number.replace('FR-', '')}
-          </span>
+          <div className="flex flex-col items-start shrink-0 w-16">
+            <span className="font-mono text-sm font-bold text-neon-blue uppercase tracking-wider">
+              {equipment.fr_number.replace('FR-', '')}
+            </span>
+            {equipment.is_priority && (
+              <span className="text-[8px] font-black text-neon-purple animate-pulse leading-none mt-0.5">⭐ PRIORIDAD</span>
+            )}
+          </div>
           
           <div className="flex-1 min-w-0">
             <span className="text-[11px] font-semibold text-text-primary truncate block uppercase leading-none mb-0.5">

@@ -43,6 +43,8 @@ export default function StatusChangeModal({
   const [techs, setTechs] = useState<Array<{ id: number; username: string }>>([])
   const [loadingTechs, setLoadingTechs] = useState(false)
 
+  const [reportNumber, setReportNumber] = useState('')
+
   // Target state object
   const selectedStateObj = isOverride
     ? allStates.find((s) => s.id === parseInt(targetStatusId, 10))
@@ -50,8 +52,10 @@ export default function StatusChangeModal({
 
   const isTargetDiagnosis = selectedStateObj?.name.trim().toLowerCase() === 'en diagnóstico'
   const isTargetMaintenance = selectedStateObj?.name.trim().toLowerCase() === 'en mantenimiento'
+  const isTargetApproval = selectedStateObj?.name.trim().toLowerCase() === 'pendiente de aprobación' || selectedStateObj?.name.trim().toLowerCase() === 'aprobado'
 
   const requiresTech = isTargetDiagnosis || isTargetMaintenance
+  const requiresReportNumber = isTargetApproval
 
   // Fetch techs if needed
   useEffect(() => {
@@ -96,6 +100,7 @@ export default function StatusChangeModal({
       setNotes('')
       setIsOverride(false)
       setOverrideReason('')
+      setReportNumber('')
     }
   }, [isOpen])
 
@@ -137,6 +142,7 @@ export default function StatusChangeModal({
         : {
             new_status_id: parseInt(targetStatusId, 10),
             notes: notes,
+            report_number: requiresReportNumber ? reportNumber : undefined,
             diagnosis_tech_id: isTargetDiagnosis ? selectedTechIds[0].toString() : null, // Legacy support
             maintenance_tech_id: isTargetMaintenance ? selectedTechIds[0].toString() : null, // Legacy support
             assigned_technician_ids: selectedTechIds, // New multi-tech support
@@ -234,6 +240,23 @@ export default function StatusChangeModal({
                     ))}
               </select>
             </div>
+
+            {/* Número de Informe Condicional */}
+            {requiresReportNumber && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-neon-blue uppercase tracking-wider">
+                  Número de Informe *
+                </label>
+                <input
+                  type="text"
+                  value={reportNumber}
+                  onChange={(e) => setReportNumber(e.target.value)}
+                  placeholder="Ej: INF-001"
+                  required
+                  className="w-full bg-bg-base/50 border border-neon-blue/50 rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all uppercase font-mono"
+                />
+              </div>
+            )}
 
             {/* Asignación de Técnico Condicional */}
             {requiresTech && (

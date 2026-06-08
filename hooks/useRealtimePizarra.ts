@@ -17,7 +17,8 @@ export function useRealtimePizarra(onTriggerRefetch?: () => void) {
           .from('equipment_with_status')
           .select('*')
           .eq('is_terminal', false)
-          .order('date_in', { ascending: true })
+          .order('is_priority', { ascending: false })
+          .order('fr_number', { ascending: false })
 
         if (error) {
           console.error('[useRealtimePizarra] Load error:', error)
@@ -121,13 +122,21 @@ export function useRealtimePizarra(onTriggerRefetch?: () => void) {
     }
   }, [onTriggerRefetch])
 
+  // Ordenar equipos: Prioridad primero, luego FR descendente
+  const sortedEquipments = [...equipments].sort((a, b) => {
+    if (a.is_priority !== b.is_priority) {
+      return a.is_priority ? -1 : 1
+    }
+    return (b.fr_number || '').localeCompare(a.fr_number || '', undefined, { numeric: true, sensitivity: 'base' })
+  })
+
   // Agrupar por estado para renderizar columnas en la pizarra
-  const groupedByStatus = equipments.reduce((acc, equipment) => {
+  const groupedByStatus = sortedEquipments.reduce((acc, equipment) => {
     const statusName = equipment.status_name
     if (!acc[statusName]) acc[statusName] = []
     acc[statusName].push(equipment)
     return acc
   }, {} as Record<string, any[]>)
 
-  return { equipments, groupedByStatus, isLoading }
+  return { equipments: sortedEquipments, groupedByStatus, isLoading }
 }

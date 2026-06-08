@@ -14,12 +14,14 @@ export const createEquipmentSchema = z.object({
   accessories: z.string().optional().nullable(),
   condition_in: z.string().optional().nullable(),
   additional_observations: z.string().optional().nullable(),
+  is_priority: z.boolean().optional().default(false),
 })
 
 export const updateStatusSchema = z.object({
   new_status_id: z.number().int({ message: 'ID de estado inválido' }),
   assigned_technician_ids: z.array(z.number()).optional(),
   notes: z.string().optional().nullable(),
+  report_number: z.string().optional().nullable(),
 })
 
 export const forceStatusSchema = z.object({

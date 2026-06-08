@@ -88,13 +88,18 @@ export default function EquipmentTable({
                   <tr
                     key={eq.id}
                     className={`hover:bg-bg-base/20 transition-colors ${
-                      isDelayed
-                        ? 'border-l-2 border-l-red-500 shadow-[inset_4px_0_12px_rgba(239,68,68,0.03)]'
-                        : 'border-l-2 border-l-transparent'
+                      eq.is_priority
+                        ? 'bg-neon-purple/5 border-l-2 border-l-neon-purple'
+                        : isDelayed
+                          ? 'border-l-2 border-l-red-500 shadow-[inset_4px_0_12px_rgba(239,68,68,0.03)]'
+                          : 'border-l-2 border-l-transparent'
                     }`}
                   >
-                    <td className="px-5 py-4 font-mono font-bold text-neon-blue uppercase">
-                      {eq.fr_number}
+                    <td className={`px-5 py-4 font-mono font-bold uppercase ${eq.is_priority ? 'text-neon-purple' : 'text-neon-blue'}`}>
+                      <div className="flex items-center gap-1.5">
+                        {eq.is_priority && <span title="Prioridad VIP">⭐</span>}
+                        {eq.fr_number}
+                      </div>
                     </td>
                     <td className="px-5 py-4 font-medium max-w-[150px] truncate">
                       {eq.client_name}
