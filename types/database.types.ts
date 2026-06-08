@@ -104,12 +104,13 @@ export type Database = {
           date_in: string
           start_diagnosis_at: string | null
           end_diagnosis_at: string | null
+          pending_approval_at: string | null
           approval_at: string | null
           start_maintenance_at: string | null
           end_maintenance_at: string | null
+          finalized_at: string | null
           updated_at: string
-          diagnosis_tech_id: string | null
-          maintenance_tech_id: string | null
+          assigned_technician_ids: number[]
           created_by: string | null
         }
         Insert: {
@@ -129,12 +130,13 @@ export type Database = {
           date_in?: string
           start_diagnosis_at?: string | null
           end_diagnosis_at?: string | null
+          pending_approval_at?: string | null
           approval_at?: string | null
           start_maintenance_at?: string | null
           end_maintenance_at?: string | null
+          finalized_at?: string | null
           updated_at?: string
-          diagnosis_tech_id?: string | null
-          maintenance_tech_id?: string | null
+          assigned_technician_ids?: number[]
           created_by?: string | null
         }
         Update: {
@@ -154,12 +156,13 @@ export type Database = {
           date_in?: string
           start_diagnosis_at?: string | null
           end_diagnosis_at?: string | null
+          pending_approval_at?: string | null
           approval_at?: string | null
           start_maintenance_at?: string | null
           end_maintenance_at?: string | null
+          finalized_at?: string | null
           updated_at?: string
-          diagnosis_tech_id?: string | null
-          maintenance_tech_id?: string | null
+          assigned_technician_ids?: number[]
           created_by?: string | null
         }
       }
@@ -218,19 +221,22 @@ export type Database = {
           date_in: string
           start_diagnosis_at: string | null
           end_diagnosis_at: string | null
+          pending_approval_at: string | null
           approval_at: string | null
           start_maintenance_at: string | null
           end_maintenance_at: string | null
+          finalized_at: string | null
           updated_at: string
-          diagnosis_tech_id: string | null
-          maintenance_tech_id: string | null
+          assigned_technician_ids: number[]
           created_by: string | null
           status_name: string
           status_color: string
           is_terminal: boolean
-          diagnosis_tech_username: string | null
-          maintenance_tech_username: string | null
           days_elapsed: number
+          phase_1_days: number
+          phase_2_days: number
+          phase_3_days: number
+          assigned_technicians: string[] | null
         }
       }
     }

@@ -332,6 +332,22 @@ export default function EquipmentDetail({
                       <span className="text-text-secondary font-semibold uppercase">Mantenimiento:</span>
                       <span className="col-span-2">{equipment.start_maintenance_at ? `${formatDate(equipment.start_maintenance_at)} (Inicio)` : 'PENDIENTE'}</span>
                     </div>
+
+                    <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1 pt-4">Seguimiento por Fases</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2">
+                      <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
+                        <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 1:<br/>Ingreso → Pendiente</span>
+                        <span className="text-base font-mono font-bold text-neon-blue">{equipment.phase_1_days} <small className="text-[9px]">DÍAS</small></span>
+                      </div>
+                      <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
+                        <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 2:<br/>Evaluación → Aprobación</span>
+                        <span className="text-base font-mono font-bold text-neon-purple">{equipment.phase_2_days} <small className="text-[9px]">DÍAS</small></span>
+                      </div>
+                      <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
+                        <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 3:<br/>Aprobación → Entrega</span>
+                        <span className="text-base font-mono font-bold text-emerald-400">{equipment.phase_3_days} <small className="text-[9px]">DÍAS</small></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

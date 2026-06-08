@@ -35,9 +35,11 @@ CREATE TABLE public.equipment_records (
   date_in               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   start_diagnosis_at    TIMESTAMPTZ,                  -- Cuando pasa a EN_DIAGNOSTICO
   end_diagnosis_at      TIMESTAMPTZ,                  -- Cuando sale de EN_DIAGNOSTICO
+  pending_approval_at   TIMESTAMPTZ,                  -- Cuando entra a PENDIENTE DE APROBACIÓN
   approval_at           TIMESTAMPTZ,                  -- Cuando se registra APROBADO
   start_maintenance_at  TIMESTAMPTZ,                  -- Cuando inicia EN_MANTENIMIENTO
   end_maintenance_at    TIMESTAMPTZ,                  -- Cuando termina EN_MANTENIMIENTO
+  finalized_at          TIMESTAMPTZ,                  -- Cuando se registra ENTREGADO
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- 6. Técnicos responsables (pueden ser personas distintas)
@@ -73,7 +75,7 @@ BEGIN
   SELECT name INTO old_state_name FROM public.workflow_states WHERE id = OLD.current_status_id;
 
   -- Inicio de diagnóstico
-  IF new_state_name = 'En diagnóstico' AND old_state_name != 'En diagnóstico' THEN
+  IF new_state_name = 'En diagnóstico' AND COALESCE(old_state_name, '') != 'En diagnóstico' THEN
     NEW.start_diagnosis_at = NOW();
   END IF;
 
@@ -82,19 +84,29 @@ BEGIN
     NEW.end_diagnosis_at = NOW();
   END IF;
 
+  -- Pendiente de aprobación
+  IF new_state_name = 'Pendiente de aprobación' AND COALESCE(old_state_name, '') != 'Pendiente de aprobación' THEN
+    NEW.pending_approval_at = NOW();
+  END IF;
+
   -- Aprobación registrada
-  IF new_state_name = 'Aprobado' THEN
+  IF new_state_name = 'Aprobado' AND COALESCE(old_state_name, '') != 'Aprobado' THEN
     NEW.approval_at = NOW();
   END IF;
 
   -- Inicio de mantenimiento
-  IF new_state_name = 'En mantenimiento' AND old_state_name != 'En mantenimiento' THEN
+  IF new_state_name = 'En mantenimiento' AND COALESCE(old_state_name, '') != 'En mantenimiento' THEN
     NEW.start_maintenance_at = NOW();
   END IF;
 
   -- Fin de mantenimiento
   IF old_state_name = 'En mantenimiento' AND new_state_name != 'En mantenimiento' THEN
     NEW.end_maintenance_at = NOW();
+  END IF;
+
+  -- Finalizado (Entregado)
+  IF new_state_name = 'Entregado' AND COALESCE(old_state_name, '') != 'Entregado' THEN
+    NEW.finalized_at = NOW();
   END IF;
 
   RETURN NEW;
