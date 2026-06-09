@@ -6,7 +6,7 @@ import { createServerClient } from '@/lib/supabase/server'
 async function checkActiveUser(supabase: any) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
-    return { error: 'No autorizado', status: 401 }
+    return { success: false, error: 'No autorizado', status: 401 }
   }
 
   const { data: userProfile } = await supabase
@@ -17,7 +17,7 @@ async function checkActiveUser(supabase: any) {
 
   const activeProfile = userProfile as any
   if (!activeProfile || !activeProfile.is_active) {
-    return { error: 'Cuenta no activa', status: 403 }
+    return { success: false, error: 'Cuenta no activa', status: 403 }
   }
 
   return { success: true, profile: activeProfile, session }
@@ -25,10 +25,10 @@ async function checkActiveUser(supabase: any) {
 
 async function checkSuperadmin(supabase: any) {
   const check = await checkActiveUser(supabase)
-  if (check.error) return check
+  if (!check.success) return check
 
   if (check.profile.role !== 'superadmin' || !check.profile.is_superadmin) {
-    return { error: 'Acceso denegado. Solo el superadmin puede realizar esta acción', status: 403 }
+    return { success: false, error: 'Acceso denegado. Solo el superadmin puede realizar esta acción', status: 403 }
   }
 
   return { success: true, session: check.session }
@@ -38,7 +38,7 @@ export async function GET() {
   try {
     const supabase = await createServerClient()
     const check = await checkActiveUser(supabase)
-    if (check.error) {
+    if (!check.success) {
       return NextResponse.json({ success: false, error: check.error }, { status: check.status })
     }
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerClient()
     const check = await checkSuperadmin(supabase)
-    if (check.error) {
+    if (!check.success) {
       return NextResponse.json({ success: false, error: check.error }, { status: check.status })
     }
 
