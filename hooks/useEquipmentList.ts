@@ -7,9 +7,10 @@ export function useEquipmentList(
   page: number = 0,
   includeDelivered: boolean = false,
   status?: string,
-  serviceType?: string
+  serviceType?: string,
+  sort: string = 'priority'
 ) {
-  let url = `/api/equipment?page=${page}&include_delivered=${includeDelivered}`
+  let url = `/api/equipment?page=${page}&include_delivered=${includeDelivered}&sort=${sort}`
   if (status) url += `&status=${encodeURIComponent(status)}`
   if (serviceType) url += `&service_type=${encodeURIComponent(serviceType)}`
 

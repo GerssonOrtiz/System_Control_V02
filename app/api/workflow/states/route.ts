@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 
 // Middleware check helper
-async function checkSuperadmin(supabase: any) {
+async function checkActiveUser(supabase: any) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) {
     return { error: 'No autorizado', status: 401 }
@@ -20,17 +20,24 @@ async function checkSuperadmin(supabase: any) {
     return { error: 'Cuenta no activa', status: 403 }
   }
 
-  if (activeProfile.role !== 'superadmin' || !activeProfile.is_superadmin) {
+  return { success: true, profile: activeProfile, session }
+}
+
+async function checkSuperadmin(supabase: any) {
+  const check = await checkActiveUser(supabase)
+  if (check.error) return check
+
+  if (check.profile.role !== 'superadmin' || !check.profile.is_superadmin) {
     return { error: 'Acceso denegado. Solo el superadmin puede realizar esta acción', status: 403 }
   }
 
-  return { success: true, session }
+  return { success: true, session: check.session }
 }
 
 export async function GET() {
   try {
     const supabase = await createServerClient()
-    const check = await checkSuperadmin(supabase)
+    const check = await checkActiveUser(supabase)
     if (check.error) {
       return NextResponse.json({ success: false, error: check.error }, { status: check.status })
     }
