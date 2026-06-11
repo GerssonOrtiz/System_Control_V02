@@ -16,8 +16,7 @@ export default function EquiposPage() {
   const [searchResults, setSearchResults] = useState<any[] | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const includeDelivered = role === 'visualizador'
-  const sort = role === 'visualizador' ? 'fr' : 'priority'
-  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, includeDelivered, undefined, undefined, sort)
+  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, includeDelivered)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)

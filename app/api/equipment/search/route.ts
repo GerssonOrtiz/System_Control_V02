@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: results, error } = await query
-      .order('fr_number', { ascending: false })
+      .order('date_in', { ascending: false })
       .limit(50)
 
     if (error) {

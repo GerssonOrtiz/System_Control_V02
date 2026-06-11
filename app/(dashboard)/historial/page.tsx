@@ -7,8 +7,8 @@ import EquipmentTable from '@/components/equipment/EquipmentTable'
 
 export default function HistorialPage() {
   const [currentPage, setCurrentPage] = useState(0)
-  // Solicitar incluyendo entregados y ordenado por FR
-  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, true, undefined, undefined, 'fr')
+  // Solicitar incluyendo entregados (el ordenamiento por fecha de ingreso es por defecto en la API)
+  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, true)
 
   return (
     <div className="space-y-6 font-sans text-text-primary p-6">
@@ -16,7 +16,7 @@ export default function HistorialPage() {
       <div>
         <h1 className="text-2xl font-bold text-neon-blue tracking-wider uppercase">📜 Historial General de Equipos</h1>
         <p className="text-text-secondary text-xs mt-1">
-          Registro histórico de todos los equipos en el sistema, ordenados por número de ficha (FR) de forma descendente.
+          Registro histórico de todos los equipos en el sistema, ordenados por fecha de ingreso (los más recientes primero).
         </p>
       </div>
 

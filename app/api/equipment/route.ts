@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
     const includeDelivered = searchParams.get('include_delivered') === 'true'
     const statusFilter = searchParams.get('status')
     const serviceFilter = searchParams.get('service_type')
-    const sortBy = searchParams.get('sort') || 'priority' // 'priority' (default) o 'fr'
     const pageSize = 20
 
     // 4. Construir consulta sobre la vista equipment_with_status
@@ -91,15 +90,8 @@ export async function GET(request: NextRequest) {
     const from = page * pageSize
     const to = from + pageSize - 1
     
-    // Ordenar dinámicamente
-    if (sortBy === 'fr') {
-      query = query.order('fr_number', { ascending: false })
-    } else {
-      // Orden por defecto: prioridad primero, luego por FR más reciente
-      query = query
-        .order('is_priority', { ascending: false })
-        .order('fr_number', { ascending: false })
-    }
+    // 5. Ordenamiento: Por fecha de ingreso, los más recientes primero (Requerimiento de sección Equipos)
+    query = query.order('date_in', { ascending: false })
 
     const { data: equipments, count, error } = await query
       .range(from, to)
