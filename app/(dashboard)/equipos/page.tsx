@@ -15,8 +15,10 @@ export default function EquiposPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[] | null>(null)
   const [isSearching, setIsSearching] = useState(false)
+  const [statusFilter, setStatusFilter] = useState('')
+  const [serviceFilter, setServiceFilter] = useState('')
   const includeDelivered = role === 'visualizador'
-  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, includeDelivered)
+  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, includeDelivered, statusFilter || undefined, serviceFilter || undefined)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -127,7 +129,7 @@ export default function EquiposPage() {
               {isDeletingAll ? '🔴 Eliminando...' : '🔴 Eliminar Todo'}
             </button>
           )}
-          {['superadmin', 'admin', 'visualizador'].includes(role || '') && (
+          {['superadmin', 'admin'].includes(role || '') && (
             <div className="flex gap-2">
               <a
                 href="/api/equipment/export?format=xlsx"
@@ -173,10 +175,10 @@ export default function EquiposPage() {
         </div>
       </div>
 
-      {/* ─── Barra de búsqueda ─── */}
-      <div className="bg-bg-surface border border-border-subtle rounded-xl p-3 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1">
+      {/* ─── Barra de búsqueda y filtros ─── */}
+      <div className="bg-bg-surface border border-border-subtle rounded-xl p-3 shadow-sm space-y-3">
+        <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm select-none pointer-events-none">
               🔍
             </span>
@@ -197,17 +199,57 @@ export default function EquiposPage() {
               </span>
             )}
           </div>
-          {searchQuery && (
-            <button
-              onClick={() => {
-                setSearchQuery('')
-                setSearchResults(null)
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value)
+                setCurrentPage(0)
               }}
-              className="px-3 py-2 text-[10px] font-bold uppercase text-text-secondary border border-border-subtle rounded-lg hover:border-neon-blue hover:text-neon-blue transition-all select-none"
+              className="flex-1 md:w-48 bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg px-3 py-2.5 text-xs text-text-primary focus:outline-none transition-all"
             >
-              ✕ Limpiar
-            </button>
-          )}
+              <option value="">TODOS LOS ESTADOS</option>
+              <option value="En espera de diagnóstico">ESPERA DIAGNÓSTICO</option>
+              <option value="En diagnóstico">EN DIAGNÓSTICO</option>
+              <option value="Pendiente de aprobación">PENDIENTE APROBACIÓN</option>
+              <option value="Aprobado">APROBADO</option>
+              <option value="En espera de repuesto">ESPERA REPUESTO</option>
+              <option value="En mantenimiento">EN MANTENIMIENTO</option>
+              <option value="Listo para control de calidad">LISTO QC</option>
+              <option value="Entregado">ENTREGADO</option>
+              <option value="REVISION">REVISIÓN (ADMIN)</option>
+              <option value="PRESTAMO">PRÉSTAMO (ADMIN)</option>
+            </select>
+
+            <select
+              value={serviceFilter}
+              onChange={(e) => {
+                setServiceFilter(e.target.value)
+                setCurrentPage(0)
+              }}
+              className="flex-1 md:w-48 bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg px-3 py-2.5 text-xs text-text-primary focus:outline-none transition-all"
+            >
+              <option value="">TODOS LOS SERVICIOS</option>
+              <option value="GARANTIA_CABELAB">GARANTÍA CABELAB</option>
+              <option value="GARANTIA_ESAB">GARANTÍA ESAB</option>
+              <option value="REVISION_GENERAL">REVISIÓN GENERAL</option>
+            </select>
+
+            {(searchQuery || statusFilter || serviceFilter) && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSearchResults(null)
+                  setStatusFilter('')
+                  setServiceFilter('')
+                }}
+                className="px-3 py-2.5 text-[10px] font-bold uppercase text-text-secondary border border-border-subtle rounded-lg hover:border-neon-blue hover:text-neon-blue transition-all select-none whitespace-nowrap"
+              >
+                ✕ Limpiar
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Indicadores de búsqueda activa */}
