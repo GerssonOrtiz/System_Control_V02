@@ -306,16 +306,25 @@ export default function EquipmentDetail({
                         <span className="col-span-2 font-mono">{equipment.serial_number}</span>
                       )}
 
-                      <span className="text-text-secondary font-semibold uppercase">N° Informe:</span>
+                      {/* Mostrar N° Informe solo si fue ingresado manualmente (no es código interno INT-xxxx) */}
                       {isEditing ? (
-                        <input
-                          type="text"
-                          value={editReportNumber}
-                          onChange={(e) => setEditReportNumber(e.target.value)}
-                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
-                        />
+                        <>
+                          <span className="text-text-secondary font-semibold uppercase">N° Informe:</span>
+                          <input
+                            type="text"
+                            value={editReportNumber}
+                            onChange={(e) => setEditReportNumber(e.target.value)}
+                            placeholder="Ej: INF-001"
+                            className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
+                          />
+                        </>
                       ) : (
-                        <span className="col-span-2 font-mono text-neon-blue font-semibold">{equipment.report_number || 'PENDIENTE'}</span>
+                        equipment.report_number && !equipment.report_number.startsWith('INT-') && (
+                          <>
+                            <span className="text-text-secondary font-semibold uppercase">N° Informe:</span>
+                            <span className="col-span-2 font-mono text-neon-blue font-semibold">{equipment.report_number}</span>
+                          </>
+                        )
                       )}
                     </div>
                   </div>

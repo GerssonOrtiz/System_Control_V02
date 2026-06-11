@@ -15,7 +15,9 @@ export default function EquiposPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[] | null>(null)
   const [isSearching, setIsSearching] = useState(false)
-  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, false)
+  const includeDelivered = role === 'visualizador'
+  const sort = role === 'visualizador' ? 'fr' : 'priority'
+  const { equipments, total, totalPages, isLoading, mutate } = useEquipmentList(currentPage, includeDelivered, undefined, undefined, sort)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -37,7 +39,7 @@ export default function EquiposPage() {
     searchTimer.current = setTimeout(async () => {
       setIsSearching(true)
       try {
-        const res = await fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}`)
+        const res = await fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}&include_delivered=${includeDelivered}`)
         const data = await res.json()
         if (data.success) {
           setSearchResults(data.data.results || [])
@@ -54,7 +56,7 @@ export default function EquiposPage() {
     return () => {
       if (searchTimer.current) clearTimeout(searchTimer.current)
     }
-  }, [searchQuery])
+  }, [searchQuery, includeDelivered])
 
   const handleDeleteAll = async () => {
     const confirmText = window.prompt(
@@ -90,12 +92,14 @@ export default function EquiposPage() {
   const getPageTitle = () => {
     if (role === 'recepcion') return '📥 Módulo de Recepción — Equipos Relevantes'
     if (role === 'almacen') return '📦 Módulo de Almacén — Equipos en Espera de Repuestos'
+    if (role === 'visualizador') return '📋 Consulta General de Equipos'
     return '📋 Lista de Equipos Activos'
   }
 
   const getPageDescription = () => {
     if (role === 'recepcion') return 'Registro de nuevos ingresos y entrega de motosoldadoras culminadas.'
     if (role === 'almacen') return 'Bandeja de equipos pendientes de entrega de repuestos técnicos.'
+    if (role === 'visualizador') return 'Búsqueda e historial completo de todos los equipos del sistema.'
     return 'Seguimiento completo de todos los equipos en proceso activo.'
   }
 
@@ -239,7 +243,7 @@ export default function EquiposPage() {
               mutate()
               if (searchQuery.trim().length >= 2) {
                 // Refresca el resultado de búsqueda también
-                fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}`)
+                fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}&include_delivered=${includeDelivered}`)
                   .then(r => r.json())
                   .then(d => { if (d.success) setSearchResults(d.data.results || []) })
                   .catch(() => {})

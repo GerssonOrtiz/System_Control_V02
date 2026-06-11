@@ -55,7 +55,8 @@ export default function StatusChangeModal({
   const isTargetApproval = selectedStateObj?.name.trim().toLowerCase() === 'pendiente de aprobación' || selectedStateObj?.name.trim().toLowerCase() === 'aprobado'
 
   const requiresTech = isTargetDiagnosis || isTargetMaintenance
-  const requiresReportNumber = isTargetApproval
+  // El número de informe ya no es obligatorio ni se solicita en el modal
+  const requiresReportNumber = false
 
   // Fetch techs if needed
   useEffect(() => {

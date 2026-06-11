@@ -3,7 +3,7 @@
 
 ## 1. Directorio Raíz y API
 *   `/app/(auth)`: Gestión de login y registro con correos virtuales `@cabelab.local`.
-*   `/app/api/equipment/[id]/update-status`: Lógica central de cambio de estado. Ahora captura el `report_number` y gestiona la asignación múltiple de técnicos.
+*   `/app/api/equipment/[id]/update-status`: Lógica central de cambio de estado. Gestiona la asignación múltiple de técnicos y genera automáticamente un `report_number` interno si no se proporciona.
 *   `/app/api/equipment/create`: Endpoint de registro con soporte para el flag `is_priority`.
 *   `/supabase/migrations`:
     *   `008_phase_tracking.sql`: Implementa columnas de hitos temporales y lógica de cálculo de días por fases.
@@ -12,7 +12,7 @@
 ## 2. Componentes de UI (`/components`)
 *   `equipment/EquipmentDetail.tsx`: Ficha detallada con visualización de **Seguimiento por Fases** y badges de **Prioridad VIP**.
 *   `equipment/EquipmentForm.tsx`: Formulario de registro con toggle para prioridad VIP y validación Zod sincronizada.
-*   `equipment/StatusChangeModal.tsx`: Interfaz de cambio de estado que solicita obligatoriamente el **Número de Informe** en transiciones críticas.
+*   `equipment/StatusChangeModal.tsx`: Interfaz de cambio de estado. Se ha eliminado la solicitud obligatoria del Número de Informe para agilizar el flujo operativo.
 *   `pizarra/PizarraCard.tsx`: Tarjetas del tablero con indicadores visuales de prioridad VIP (brillo púrpura y estrella).
 *   `equipment/EquipmentTable.tsx`: Tabla de gestión con ordenamiento optimizado y resaltado de equipos prioritarios.
 

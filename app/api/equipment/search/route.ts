@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
     // 3. Obtener query y normalizar
     const { searchParams } = new URL(request.url)
     const rawQuery = searchParams.get('q') || ''
+    const includeDelivered = searchParams.get('include_delivered') === 'true'
     const searchQuery = rawQuery.trim().toUpperCase()
 
     if (searchQuery.length < 2) {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Buscar coincidencias en la vista usando ilike sobre campos clave
-    const { data: results, error } = await supabase
+    let query = supabase
       .from('equipment_with_status')
       .select('*')
       .or(
@@ -53,7 +54,14 @@ export async function GET(request: NextRequest) {
         `serial_number.ilike.%${searchQuery}%,` +
         `status_name.ilike.%${searchQuery}%`
       )
-      .order('date_in', { ascending: false })
+
+    // Si no se pide incluir entregados, filtrar por is_terminal
+    if (!includeDelivered) {
+      query = query.eq('is_terminal', false)
+    }
+
+    const { data: results, error } = await query
+      .order('fr_number', { ascending: false })
       .limit(50)
 
     if (error) {

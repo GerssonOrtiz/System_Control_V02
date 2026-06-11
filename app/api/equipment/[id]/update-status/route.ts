@@ -102,7 +102,12 @@ export async function POST(
       additional_observations: notes?.trim().toUpperCase() || null,
     }
 
-    if (report_number) {
+    // Si el estado es de aprobación y no hay número de informe, generamos uno interno
+    const isTargetApproval = activeTargetState.name.trim().toLowerCase() === 'pendiente de aprobación' || activeTargetState.name.trim().toLowerCase() === 'aprobado'
+    
+    if (isTargetApproval && !report_number) {
+      updateData.report_number = `INT-${Date.now()}`
+    } else if (report_number) {
       updateData.report_number = report_number.trim().toUpperCase()
     }
 

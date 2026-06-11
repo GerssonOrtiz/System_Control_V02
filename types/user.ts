@@ -140,5 +140,5 @@ export const SIDEBAR_ITEMS_BY_ROLE: Record<UserRole, string[]> = {
   operaciones:  ['taller', 'pizarra', 'buscar', 'perfil'],
   recepcion:    ['equipos', 'pizarra', 'buscar', 'perfil'],
   almacen:      ['equipos', 'pizarra', 'buscar', 'perfil'],
-  visualizador: ['pizarra', 'estadisticas', 'historial', 'buscar', 'perfil'],
+  visualizador: ['pizarra', 'estadisticas', 'equipos', 'perfil'],
 }

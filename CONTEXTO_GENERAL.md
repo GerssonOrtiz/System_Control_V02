@@ -30,6 +30,6 @@ CABELAB v2.0 es una plataforma integral diseñada para digitalizar y automatizar
 ## 5. Reglas de Negocio Críticas
 1.  **Prioridad VIP:** Los equipos marcados como VIP tienen precedencia visual (estrellas y bordes neón púrpura) y se ordenan al inicio de todas las listas.
 2.  **Ordenamiento Inteligente:** Las listas y la pizarra se ordenan por: 1° Prioridad VIP, 2° Número de Ficha (FR) descendente.
-3.  **Trazabilidad de Informes:** Al finalizar un diagnóstico (pasar a Pendiente de Aprobación o Aprobado), es obligatorio ingresar el **Número de Informe**.
+3.  **Trazabilidad de Informes (Interna):** El sistema gestiona internamente los informes. Ya no es obligatorio que el usuario ingrese un número de informe manualmente; el sistema asignará uno automático si no se proporciona, y este dato queda oculto en el dashboard principal para simplificar la vista operativa.
 4.  **Audit Log:** Cada cambio de estado genera un registro inmutable en `status_history`.
 5.  **Timestamps Operativos:** Triggers en DB capturan automáticamente los hitos temporales para el cálculo de indicadores de desempeño (KPIs).
