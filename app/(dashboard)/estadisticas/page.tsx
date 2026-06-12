@@ -14,7 +14,13 @@ interface StatsData {
   by_status: Array<{ status_name: string; count: number; color: string }>
   by_service_type: Array<{ service_type: string; count: number }>
   by_brand: Array<{ brand: string; count: number }>
-  by_company: Array<{ name: string; total: number; by_status: Array<{ status: string; count: number }> }>
+  by_company: Array<{ 
+    name: string; 
+    total: number; 
+    by_status: Array<{ status: string; count: number }>;
+    by_brand: Array<{ brand: string; count: number }>;
+    top_models: Array<{ model: string; count: number }>;
+  }>
   delayed_equipment: Array<{ fr_number: string; client_name: string; status_name: string; days_elapsed: number }>
 }
 
@@ -351,6 +357,50 @@ export default function EstadisticasPage() {
                         </div>
                       )
                     })}
+                  </div>
+
+                  {/* Nuevas Secciones: Marcas y Modelos */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-border-subtle/30">
+                    {/* Marcas de la Empresa */}
+                    <div className="space-y-3">
+                      <h5 className="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
+                        🏷️ Marcas Preferentes
+                      </h5>
+                      <div className="space-y-2">
+                        {company.by_brand.map((b) => (
+                          <div key={b.brand} className="flex items-center justify-between group">
+                            <span className="text-xs text-text-secondary uppercase">{b.brand}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 h-1 bg-bg-base rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-neon-blue/60" 
+                                  style={{ width: `${(b.count / company.total) * 100}%` }}
+                                />
+                              </div>
+                              <span className="text-[10px] font-mono font-bold text-text-primary w-4 text-right">{b.count}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Modelos más Frecuentes */}
+                    <div className="space-y-3">
+                      <h5 className="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
+                        📑 Modelos Recurrentes
+                      </h5>
+                      <div className="flex flex-wrap gap-2">
+                        {company.top_models.map((m) => (
+                          <div key={m.model} className="bg-bg-surface border border-border-subtle px-2 py-1 rounded flex items-center gap-2 group hover:border-neon-purple/50 transition-colors">
+                            <span className="text-[9px] font-bold text-text-primary uppercase">{m.model}</span>
+                            <span className="text-[9px] font-mono bg-neon-purple/10 text-neon-purple px-1.5 rounded-full">{m.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {company.top_models.length === 0 && (
+                        <p className="text-[10px] text-text-muted italic">Sin datos de modelos</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )

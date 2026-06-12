@@ -106,21 +106,53 @@ export async function GET(request: NextRequest) {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
 
-    // 4b. Agrupar por Empresa (Cliente)
-    const companyStats: Record<string, { name: string; total: number; by_status: Record<string, number> }> = {}
+    // 4b. Agrupar por Empresa (Cliente) con detalles de Marcas y Modelos
+    const companyStats: Record<string, { 
+      name: string; 
+      total: number; 
+      by_status: Record<string, number>;
+      by_brand: Record<string, number>;
+      top_models: Record<string, number>;
+    }> = {}
+
     for (const e of equipmentList) {
       const company = e.client_name || 'DESCONOCIDO'
+      const brand = e.brand || 'SIN MARCA'
+      const model = e.model || 'SIN MODELO'
+
       if (!companyStats[company]) {
-        companyStats[company] = { name: company, total: 0, by_status: {} }
+        companyStats[company] = { 
+          name: company, 
+          total: 0, 
+          by_status: {}, 
+          by_brand: {},
+          top_models: {}
+        }
       }
       companyStats[company].total++
+      
+      // Conteo por estado
       companyStats[company].by_status[e.status_name] = (companyStats[company].by_status[e.status_name] || 0) + 1
+      
+      // Conteo por marca
+      companyStats[company].by_brand[brand] = (companyStats[company].by_brand[brand] || 0) + 1
+      
+      // Conteo por modelo
+      companyStats[company].top_models[model] = (companyStats[company].top_models[model] || 0) + 1
     }
+
     const by_company = Object.values(companyStats)
       .sort((a, b) => b.total - a.total)
       .map(c => ({
         ...c,
-        by_status: Object.entries(c.by_status).map(([status, count]) => ({ status, count }))
+        by_status: Object.entries(c.by_status).map(([status, count]) => ({ status, count })),
+        by_brand: Object.entries(c.by_brand)
+          .map(([brand, count]) => ({ brand, count }))
+          .sort((a, b) => b.count - a.count),
+        top_models: Object.entries(c.top_models)
+          .map(([model, count]) => ({ model, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5) // Solo los 5 modelos más frecuentes
       }))
 
     // 5. Equipos entregados este mes
