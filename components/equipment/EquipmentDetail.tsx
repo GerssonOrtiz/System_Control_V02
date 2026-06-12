@@ -343,7 +343,16 @@ export default function EquipmentDetail({
                           className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
                         />
                       ) : (
-                        <span className="col-span-2 font-mono">{equipment.serial_number}</span>
+                        <div className="col-span-2 flex items-center gap-2">
+                          <span className="font-mono">{equipment.serial_number}</span>
+                          <a 
+                            href={`/dna?s=${encodeURIComponent(equipment.serial_number || '')}`}
+                            className="text-[9px] bg-neon-purple/10 border border-neon-purple/30 text-neon-purple px-1.5 py-0.5 rounded hover:bg-neon-purple/20 transition-colors font-bold uppercase"
+                            title="Ver Historial Clínico (DNA)"
+                          >
+                            Ver DNA 🧬
+                          </a>
+                        </div>
                       )}
 
                       {/* Mostrar N° Informe solo si fue ingresado manualmente (no es código interno INT-xxxx) */}

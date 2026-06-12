@@ -68,6 +68,12 @@ const ALL_SIDEBAR_ITEMS: Record<string, SidebarItem> = {
     href: '/estadisticas',
     icon: '📈',
   },
+  dna: {
+    key: 'dna',
+    label: 'DNA Equipo',
+    href: '/dna',
+    icon: '🧬',
+  },
   perfil: {
     key: 'perfil',
     label: 'Mi perfil',

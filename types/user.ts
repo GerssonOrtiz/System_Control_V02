@@ -135,10 +135,10 @@ export const ROLE_HOME_ROUTE: Record<UserRole, string> = {
 
 /** Items del sidebar visibles según el rol */
 export const SIDEBAR_ITEMS_BY_ROLE: Record<UserRole, string[]> = {
-  superadmin:   ['usuarios', 'dashboard', 'pizarra', 'equipos', 'workflow', 'estadisticas', 'perfil'],
-  admin:        ['dashboard', 'pizarra', 'equipos', 'historial', 'estadisticas', 'perfil'],
-  operaciones:  ['taller', 'pizarra', 'buscar', 'perfil'],
-  recepcion:    ['equipos', 'pizarra', 'buscar', 'perfil'],
-  almacen:      ['equipos', 'pizarra', 'buscar', 'perfil'],
-  visualizador: ['pizarra', 'estadisticas', 'equipos', 'perfil'],
+  superadmin:   ['usuarios', 'dashboard', 'pizarra', 'equipos', 'workflow', 'estadisticas', 'dna', 'perfil'],
+  admin:        ['dashboard', 'pizarra', 'equipos', 'historial', 'estadisticas', 'dna', 'perfil'],
+  operaciones:  ['taller', 'pizarra', 'buscar', 'dna', 'perfil'],
+  recepcion:    ['equipos', 'pizarra', 'buscar', 'dna', 'perfil'],
+  almacen:      ['equipos', 'pizarra', 'buscar', 'dna', 'perfil'],
+  visualizador: ['pizarra', 'estadisticas', 'equipos', 'dna', 'perfil'],
 }
