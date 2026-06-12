@@ -114,10 +114,11 @@ export default function PizarraBoard() {
           {/* Caso especial: Coordinación con el cliente (Pestaña Flotante/Expandible a la derecha) */}
           {diagCols.find(c => c.name === 'Coordinación con el cliente') && (
             (() => {
-              const col = diagCols.find(c => c.name === 'Coordinación con el cliente')
+              const col = diagCols.find(c => c.name === 'Coordinación con el cliente')!
               const equipmentsInCol = groupedByStatus[col.name] || []
               return (
                 <div
+                  key={col.id}
                   className={`flex flex-col border border-neon-purple/40 rounded-xl transition-all duration-500 ease-in-out shadow-2xl ${
                     isCoordinationOpen 
                       ? 'min-w-[300px] flex-1 bg-bg-surface/60 backdrop-blur-md' 
@@ -172,37 +173,6 @@ export default function PizarraBoard() {
           )}
         </div>
       </div>
-                {/* Column Header */}
-                <div className="flex justify-between items-center pb-2 border-b border-border-subtle/60 mb-3">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary flex items-center gap-2">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full inline-block"
-                      style={{ backgroundColor: col.color, boxShadow: `0 0 8px ${col.color}` }}
-                    />
-                    {col.name}
-                  </h3>
-                  <span className="text-[10px] font-mono font-bold bg-bg-base border border-border-subtle text-text-secondary px-2 py-0.5 rounded-full">
-                    {equipmentsInCol.length}
-                  </span>
-                </div>
-
-                {/* Cards Area */}
-                <div className="space-y-1 overflow-y-auto flex-1 pr-1 scrollbar-thin min-h-[80px]">
-                  {equipmentsInCol.length === 0 ? (
-                    <div className="text-center py-6 text-[10px] text-text-muted italic">
-                      Sin equipos
-                    </div>
-                  ) : (
-                    equipmentsInCol.map((eq: any) => (
-                      <PizarraCard key={eq.id} equipment={eq} />
-                    ))
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
 
       {/* Sección Servicio */}
       <div className="flex-1 flex flex-col min-h-0 bg-bg-surface/10 border border-border-subtle/40 rounded-2xl p-4 shadow-sm">
@@ -218,7 +188,7 @@ export default function PizarraBoard() {
             return (
               <div
                 key={col.id}
-                className="flex-1 min-w-0 bg-bg-surface/30 border border-border-subtle/80 rounded-xl p-4 flex flex-col max-h-full"
+                className="flex-1 min-w-[280px] bg-bg-surface/30 border border-border-subtle/80 rounded-xl p-4 flex flex-col max-h-full"
               >
                 {/* Column Header */}
                 <div className="flex justify-between items-center pb-2 border-b border-border-subtle/60 mb-3">
