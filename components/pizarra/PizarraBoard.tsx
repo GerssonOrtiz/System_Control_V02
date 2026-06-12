@@ -111,51 +111,55 @@ export default function PizarraBoard() {
             )
           })}
 
-          {/* Caso especial: Coordinación con el cliente (Pestaña Flotante/Expandible a la derecha) */}
+          {/* Caso especial: Coordinación con el cliente (Pestaña Flotante Horizontal -> Columna Derecha) */}
           {diagCols.find(c => c.name === 'Coordinación con el cliente') && (
             (() => {
               const col = diagCols.find(c => c.name === 'Coordinación con el cliente')!
               const equipmentsInCol = groupedByStatus[col.name] || []
+              const coordinationColor = '#818CF8' // Indigo suave, no emergencia
+              
               return (
                 <div
                   key={col.id}
-                  className={`flex flex-col border border-neon-purple/40 rounded-xl transition-all duration-500 ease-in-out shadow-2xl ${
+                  className={`flex flex-col border transition-all duration-500 ease-in-out shadow-2xl rounded-xl ${
                     isCoordinationOpen 
-                      ? 'min-w-[300px] flex-1 bg-bg-surface/60 backdrop-blur-md' 
-                      : 'w-10 bg-bg-surface/40 absolute right-4 bottom-4 top-12 z-20'
+                      ? 'min-w-[300px] flex-1 bg-bg-surface/60 backdrop-blur-md border-indigo-500/50' 
+                      : 'w-max h-10 bg-indigo-500/10 border-indigo-500/30 absolute right-4 bottom-4 z-20 backdrop-blur-sm'
                   }`}
                 >
                   <button
                     onClick={() => setIsCoordinationOpen(!isCoordinationOpen)}
-                    className={`flex items-center justify-between p-2 h-full outline-none group ${
-                      !isCoordinationOpen ? 'flex-col justify-end pb-4 gap-8' : 'border-b border-border-subtle/60'
+                    className={`flex items-center gap-3 outline-none group transition-all ${
+                      !isCoordinationOpen 
+                        ? 'px-4 h-full hover:bg-indigo-500/20' 
+                        : 'p-3 border-b border-border-subtle/60'
                     }`}
                   >
                     {isCoordinationOpen ? (
                       <>
-                        <h3 className="text-[11px] font-black uppercase tracking-widest text-neon-purple flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-neon-purple shadow-[0_0_10px_#9D4EDD]" />
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_10px_#818CF8]" />
                           {col.name}
                         </h3>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-mono font-bold bg-bg-base border border-neon-purple/40 text-neon-purple px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-mono font-bold bg-bg-base border border-indigo-500/40 text-indigo-400 px-2 py-0.5 rounded-full">
                             {equipmentsInCol.length}
                           </span>
-                          <span className="text-neon-purple text-xs animate-pulse">❮</span>
+                          <span className="text-indigo-400 text-xs animate-pulse">❮</span>
                         </div>
                       </>
                     ) : (
                       <>
-                        <div className="flex flex-col items-center gap-3">
-                          <span className="text-neon-purple text-xs animate-bounce">❯</span>
-                          <span className="text-[10px] font-mono font-bold text-neon-purple bg-bg-base border border-neon-purple/40 px-1.5 py-0.5 rounded-full">
-                            {equipmentsInCol.length}
-                          </span>
-                        </div>
-                        <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-black uppercase tracking-[0.3em] text-neon-purple shadow-neon-purple whitespace-nowrap mb-4">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_#818CF8] animate-pulse" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">
                           {col.name}
                         </span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-neon-purple shadow-[0_0_8px_#9D4EDD] animate-pulse" />
+                        <div className="flex items-center gap-2 border-l border-indigo-500/30 pl-3 ml-1">
+                          <span className="text-[10px] font-mono font-bold text-indigo-400">
+                            {equipmentsInCol.length}
+                          </span>
+                          <span className="text-indigo-400 text-xs group-hover:translate-x-1 transition-transform">❯</span>
+                        </div>
                       </>
                     )}
                   </button>
