@@ -106,19 +106,26 @@ export async function GET(request: NextRequest) {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
 
-    // 4b. Agrupar por Empresa (Cliente) con detalles de Marcas y Modelos
+    // 4b. Agrupar por Empresa (Cliente) con detalles de Marcas, Modelos y Entradas Recientes
     const companyStats: Record<string, { 
       name: string; 
       total: number; 
       by_status: Record<string, number>;
       by_brand: Record<string, number>;
       top_models: Record<string, number>;
+      recent_equipment: Array<{ brand: string; model: string; date_in: string; fr_number: string }>;
     }> = {}
 
-    for (const e of equipmentList) {
+    // Primero ordenamos por fecha para obtener los más recientes
+    const sortedEquips = [...equipmentList].sort((a, b) => 
+      new Date(b.date_in).getTime() - new Date(a.date_in).getTime()
+    )
+
+    for (const e of sortedEquips) {
       const company = e.client_name || 'DESCONOCIDO'
-      const brand = e.brand || 'SIN MARCA'
-      const model = e.model || 'SIN MODELO'
+      const brand = e.brand || 'S/M'
+      const model = e.model || ''
+      const isModelGeneric = !model || ['N/A', 'SIN MODELO', '.', '-', 'S/M', 'S/N'].includes(model.toUpperCase())
 
       if (!companyStats[company]) {
         companyStats[company] = { 
@@ -126,7 +133,8 @@ export async function GET(request: NextRequest) {
           total: 0, 
           by_status: {}, 
           by_brand: {},
-          top_models: {}
+          top_models: {},
+          recent_equipment: []
         }
       }
       companyStats[company].total++
@@ -137,8 +145,20 @@ export async function GET(request: NextRequest) {
       // Conteo por marca
       companyStats[company].by_brand[brand] = (companyStats[company].by_brand[brand] || 0) + 1
       
-      // Conteo por modelo
-      companyStats[company].top_models[model] = (companyStats[company].top_models[model] || 0) + 1
+      // Conteo por modelo (Solo si no es genérico)
+      if (!isModelGeneric) {
+        companyStats[company].top_models[model] = (companyStats[company].top_models[model] || 0) + 1
+      }
+
+      // Agregar a recientes (máximo 10)
+      if (companyStats[company].recent_equipment.length < 10) {
+        companyStats[company].recent_equipment.push({
+          brand,
+          model: model || 'SIN MODELO',
+          date_in: e.date_in,
+          fr_number: e.fr_number
+        })
+      }
     }
 
     const by_company = Object.values(companyStats)
@@ -152,7 +172,7 @@ export async function GET(request: NextRequest) {
         top_models: Object.entries(c.top_models)
           .map(([model, count]) => ({ model, count }))
           .sort((a, b) => b.count - a.count)
-          .slice(0, 5) // Solo los 5 modelos más frecuentes
+          .slice(0, 5)
       }))
 
     // 5. Equipos entregados este mes
