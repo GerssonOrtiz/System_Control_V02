@@ -15,8 +15,8 @@ CABELAB v2.0 es una plataforma integral diseñada para digitalizar y automatizar
 
 ## 3. Arquitectura del Workflow Engine
 *   **Motor Dinámico:** Los estados y transiciones se definen en tablas (`workflow_states`, `workflow_transitions`).
-*   **Estados Administrativos:** Existen estados especiales (**REVISION**, **PRESTAMO**) fuera del flujo normal, accesibles solo por el Superadmin mediante la función "Force Status".
-*   **Gestión de Técnicos:** Sistema de **Asignación Múltiple**. Un equipo puede tener varios técnicos a cargo. Los nombres se gestionan en una tabla maestra independiente (`technicians`).
+*   **Coordinación con el Cliente:** Nuevo estado administrativo plegable en la pizarra, diseñado como punto de control antes de la aprobación final.
+*   **Control Total (Superadmin):** Capacidad de editar manualmente cualquier timestamp operativo (ingreso, diagnóstico, mantenimiento, fases) para corregir desviaciones en KPIs.
 *   **Seguimiento de Tiempos por Fase:** El sistema mide automáticamente la duración en días de tres fases clave:
     1.  **Fase 1:** Ingreso → Pendiente de Aprobación.
     2.  **Fase 2:** Evaluación → Aprobación.
@@ -28,8 +28,9 @@ CABELAB v2.0 es una plataforma integral diseñada para digitalizar y automatizar
 *   **Operaciones/Almacen/Recepcion:** Permisos restringidos según la fase del equipo.
 
 ## 5. Reglas de Negocio Críticas
-1.  **Prioridad VIP:** Los equipos marcados como VIP tienen precedencia visual (estrellas y bordes neón púrpura) y se ordenan al inicio de todas las listas.
-2.  **Ordenamiento Inteligente:** Las listas y la pizarra se ordenan por: 1° Prioridad VIP, 2° Número de Ficha (FR) descendente.
-3.  **Trazabilidad de Informes (Interna):** El sistema gestiona internamente los informes. Ya no es obligatorio que el usuario ingrese un número de informe manualmente; el sistema asignará uno automático si no se proporciona, y este dato queda oculto en el dashboard principal para simplificar la vista operativa.
-4.  **Audit Log:** Cada cambio de estado genera un registro inmutable en `status_history`.
-5.  **Timestamps Operativos:** Triggers en DB capturan automáticamente los hitos temporales para el cálculo de indicadores de desempeño (KPIs).
+1.  **DNA del Equipo (Lifecycle History):** Trazabilidad completa por **Número de Serie**. Permite ver todas las intervenciones históricas de una máquina específica a través del tiempo, detectando recurrencias y garantizando la calidad.
+2.  **Prioridad VIP:** Los equipos marcados como VIP tienen precedencia visual (estrellas y bordes neón púrpura) y se ordenan al inicio de todas las listas.
+3.  **Análisis por Empresa:** El dashboard administrativo incluye un menú estadístico profundo por cliente, desglosando marcas preferentes, modelos recurrentes y registro de entradas recientes.
+4.  **Buscador Inteligente:** Sistema de búsqueda optimizado en Dashboard para localización instantánea por FR, Cliente o Serie.
+5.  **Audit Log:** Cada cambio de estado genera un registro inmutable en `status_history`.
+6.  **Timestamps Operativos:** Triggers en DB y controles de Superadmin capturan los hitos temporales para el cálculo de indicadores de desempeño (KPIs).

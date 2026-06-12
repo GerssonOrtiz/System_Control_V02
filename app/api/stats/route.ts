@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     // 4. Obtener equipos (TODOS) de la vista para estadísticas globales
     const { data: allEquips, error: allErr } = await supabase
       .from('equipment_with_status')
-      .select('id, fr_number, client_name, status_name, status_color, service_type, days_elapsed, brand, assigned_technicians, is_terminal')
+      .select('id, fr_number, client_name, status_name, status_color, service_type, days_elapsed, brand, model, assigned_technicians, is_terminal, date_in')
 
     if (allErr) {
       console.error('[GET /api/stats] Database error:', allErr)

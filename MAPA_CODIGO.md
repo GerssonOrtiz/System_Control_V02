@@ -1,31 +1,31 @@
 # MAPA DEL CÓDIGO — CABELAB v2.0
-> Guía de navegación técnica actualizada tras la implementación de fases, prioridades e informes.
+> Guía de navegación técnica actualizada tras la implementación de DNA, estadísticas por empresa y controles de Superadmin.
 
 ## 1. Directorio Raíz y API
-*   `/app/(auth)`: Gestión de login y registro con correos virtuales `@cabelab.local`.
-*   `/app/api/equipment/[id]/update-status`: Lógica central de cambio de estado. Gestiona la asignación múltiple de técnicos y genera automáticamente un `report_number` interno si no se proporciona.
-*   `/app/api/equipment/create`: Endpoint de registro con soporte para el flag `is_priority`.
+*   `/app/(auth)`: Gestión de login con correos virtuales `@cabelab.local`.
+*   `/app/api/equipment/[id]/update`: Endpoint maestro de actualización. Permite a Superadmins editar todos los campos, incluyendo timestamps operativos.
+*   `/app/api/equipment/serial/[serial]`: Nueva API para el módulo DNA. Recupera el historial clínico completo de una máquina por su número de serie único.
+*   `/app/api/stats`: Endpoint de analíticas globales, ahora con agregación por empresa (marcas, modelos y entradas recientes).
 *   `/supabase/migrations`:
-    *   `008_phase_tracking.sql`: Implementa columnas de hitos temporales y lógica de cálculo de días por fases.
-    *   `009_priority_and_sorting.sql`: Añade soporte para el sistema de prioridades VIP y actualiza la vista principal.
+    *   `006_seed_workflow.sql`: Define el flujo operativo, incluyendo el nuevo estado "Coordinación con el cliente".
 
 ## 2. Componentes de UI (`/components`)
-*   `equipment/EquipmentDetail.tsx`: Ficha detallada con visualización de **Seguimiento por Fases** y badges de **Prioridad VIP**.
-*   `equipment/EquipmentForm.tsx`: Formulario de registro con toggle para prioridad VIP y validación Zod sincronizada.
-*   `equipment/StatusChangeModal.tsx`: Interfaz de cambio de estado. Se ha eliminado la solicitud obligatoria del Número de Informe para agilizar el flujo operativo.
-*   `pizarra/PizarraCard.tsx`: Tarjetas del tablero con indicadores visuales de prioridad VIP (brillo púrpura y estrella).
-*   `equipment/EquipmentTable.tsx`: Tabla de gestión con ordenamiento optimizado y resaltado de equipos prioritarios.
+*   `equipment/EquipmentDetail.tsx`: Ficha detallada con inputs de fecha/hora para Superadmin y enlace directo al DNA del equipo.
+*   `pizarra/PizarraBoard.tsx`: Tablero Realtime con la pestaña plegable horizontal de **Coordinación con el cliente** (Color Indigo Soft).
+*   `dashboard/DashboardPage.tsx`: Panel principal con buscador global (FR/Cliente) y métricas rápidas.
+*   `estadisticas/EstadisticasPage.tsx`: Módulo de análisis por empresa con listas de clientes, marcas preferentes y modelos recurrentes.
+*   `dna/DNAPage.tsx`: Interfaz de Lifecycle Tracker con línea de tiempo histórica por máquina.
 
 ## 3. Lógica y Validación (`/lib`)
-*   `validations/equipment.schema.ts`: Esquemas Zod que validan la prioridad VIP (`is_priority`) y el número de informe (`report_number`).
-*   `workflow/engine.ts`: Validador de transiciones y estados administrativos.
+*   `permissions.ts`: Define las reglas de acceso, permitiendo al Superadmin realizar overrides y ediciones críticas.
+*   `validations/equipment.schema.ts`: Esquemas Zod para integridad de datos.
 
 ## 4. Hooks y Estado (`/hooks`)
-*   `useRealtimePizarra.ts`: Suscripción Realtime a `equipment_records`. Incluye lógica de ordenamiento en cliente por Prioridad (1°) y FR Descendente (2°).
-*   `useEquipmentList.ts`: Gestión de caché y fetching de datos para las listas paginadas.
+*   `useRealtimePizarra.ts`: Suscripción Realtime. Maneja el agrupamiento por estados para las columnas de la pizarra.
+*   `useEquipmentList.ts`: Hooks personalizados para fetching de equipos y estadísticas del dashboard.
 
 ## 5. Base de Datos y Vistas
-*   `equipment_with_status`: Vista central que une equipos con estados, técnicos y calcula dinámicamente:
-    *   `days_elapsed`: Días totales.
-    *   `phase_1_days`, `phase_2_days`, `phase_3_days`: Duración específica de cada etapa operativa.
-    *   `assigned_technicians`: Nombres del personal a cargo.
+*   `equipment_with_status`: Vista central que expone todos los metadatos operativos, calculando:
+    *   `days_elapsed`: Tiempo total en taller.
+    *   `phase_1_days`, `phase_2_days`, `phase_3_days`: Hitos operativos automáticos.
+    *   `assigned_technicians`: Personal asignado vía tabla `technicians`.
