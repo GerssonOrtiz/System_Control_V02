@@ -344,14 +344,17 @@ export default function EquipmentDetail({
                         />
                       ) : (
                         <div className="col-span-2 flex items-center gap-2">
-                          <span className="font-mono">{equipment.serial_number}</span>
-                          <a 
-                            href={`/dna?s=${encodeURIComponent(equipment.serial_number || '')}`}
-                            className="text-[9px] bg-neon-purple/10 border border-neon-purple/30 text-neon-purple px-1.5 py-0.5 rounded hover:bg-neon-purple/20 transition-colors font-bold uppercase"
-                            title="Ver Historial Clínico (DNA)"
-                          >
-                            Ver DNA 🧬
-                          </a>
+                          <span className="font-mono">{equipment.serial_number || '-'}</span>
+                          {equipment.serial_number && 
+                           !['N/S', 'S/N', 'N/A', 'SIN SERIE', 'SIN N/S', '-', '.'].includes(equipment.serial_number.trim().toUpperCase()) && (
+                            <a 
+                              href={`/dna?s=${encodeURIComponent(equipment.serial_number)}`}
+                              className="text-[9px] bg-neon-purple/10 border border-neon-purple/30 text-neon-purple px-1.5 py-0.5 rounded hover:bg-neon-purple/20 transition-colors font-bold uppercase"
+                              title="Ver Historial Clínico (DNA)"
+                            >
+                              Ver DNA 🧬
+                            </a>
+                          )}
                         </div>
                       )}
 

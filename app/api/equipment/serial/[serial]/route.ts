@@ -8,6 +8,22 @@ export async function GET(
 ) {
   try {
     const { serial } = await params
+    const cleanSerial = serial.trim().toUpperCase()
+
+    // 1. Validar que no sea un valor genérico de "sin serie"
+    const genericValues = ['N/S', 'S/N', 'N/A', 'SIN SERIE', 'SIN N/S', '-', '.', '', 'UNDEFINED', 'NULL']
+    if (genericValues.includes(cleanSerial)) {
+      return NextResponse.json({ 
+        success: true, 
+        data: { 
+          found: false, 
+          serial: cleanSerial,
+          interventions: [],
+          message: 'El valor ingresado es genérico y no identifica a una máquina única.'
+        } 
+      })
+    }
+
     const supabase = await createServerClient()
 
     // 1. Verificar sesión
