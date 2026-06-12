@@ -9,20 +9,24 @@ TRUNCATE public.workflow_states CASCADE;
 INSERT INTO public.workflow_states (name, order_index, is_initial, is_terminal, color) VALUES
   ('En espera de diagnóstico',        1,  true,  false, '#00E5FF'),
   ('En diagnóstico',                  2,  false, false, '#0052FF'),
-  ('En espera de repuesto',           3,  false, false, '#9D4EDD'),
-  ('Pendiente de aprobación',         4,  false, false, '#F59E0B'),
-  ('Aprobado',                        5,  false, false, '#10B981'),
-  ('En mantenimiento',                6,  false, false, '#0052FF'),
-  ('En espera de repuesto adicional', 7,  false, false, '#9D4EDD'),
-  ('Entregado',                       8,  false, true,  '#10B981');
+  ('Coordinación con el cliente',     3,  false, false, '#F59E0B'),
+  ('En espera de repuesto',           4,  false, false, '#9D4EDD'),
+  ('Pendiente de aprobación',         5,  false, false, '#F59E0B'),
+  ('Aprobado',                        6,  false, false, '#10B981'),
+  ('En mantenimiento',                7,  false, false, '#0052FF'),
+  ('En espera de repuesto adicional', 8,  false, false, '#9D4EDD'),
+  ('Entregado',                       9,  false, true,  '#10B981');
 
 -- Transiciones permitidas entre estados
 INSERT INTO public.workflow_transitions (from_state_id, to_state_id, allowed_roles)
 SELECT f.id, t.id, roles.allowed
 FROM (VALUES
   ('En espera de diagnóstico',        'En diagnóstico',                   ARRAY['operaciones','admin','superadmin']),
+  ('En diagnóstico',                  'Coordinación con el cliente',      ARRAY['operaciones','admin','superadmin']),
+  ('Coordinación con el cliente',     'En diagnóstico',                   ARRAY['operaciones','admin','superadmin']),
   ('En diagnóstico',                  'En espera de repuesto',            ARRAY['operaciones','admin','superadmin']),
   ('En diagnóstico',                  'Pendiente de aprobación',          ARRAY['operaciones','admin','superadmin']),
+  ('Coordinación con el cliente',     'Pendiente de aprobación',          ARRAY['operaciones','admin','superadmin']),
   ('En espera de repuesto',           'En diagnóstico',                   ARRAY['operaciones','admin','superadmin']),
   ('Pendiente de aprobación',         'Aprobado',                         ARRAY['recepcion','admin','superadmin']),
   ('Aprobado',                        'En mantenimiento',                 ARRAY['operaciones','admin','superadmin']),

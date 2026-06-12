@@ -8,6 +8,7 @@ import PizarraCard from './PizarraCard'
 export default function PizarraBoard() {
   const { groupedByStatus, isLoading } = useRealtimePizarra()
   const [columns, setColumns] = useState<any[]>([])
+  const [isCoordinationOpen, setIsCoordinationOpen] = useState(false)
 
   // Load workflow states for the columns
   useEffect(() => {
@@ -33,14 +34,19 @@ export default function PizarraBoard() {
     )
   }
 
-  const orderedDiagNames = ['En espera de diagnóstico', 'En diagnóstico', 'En espera de repuesto']
+  const orderedDiagNames = ['En espera de diagnóstico', 'En diagnóstico', 'Coordinación con el cliente', 'En espera de repuesto']
   const orderedServNames = ['Aprobado', 'En mantenimiento', 'En espera de repuesto adicional']
 
   const diagCols = orderedDiagNames
     .map(name => columns.find(c => c.name.trim().toUpperCase() === name.toUpperCase()))
     .filter(Boolean)
     .filter(col => {
+      // "En espera de repuesto" solo se muestra si tiene equipos
       if (col.name === 'En espera de repuesto') {
+        return (groupedByStatus[col.name]?.length || 0) > 0
+      }
+      // "Coordinación con el cliente" solo se muestra si tiene equipos
+      if (col.name === 'Coordinación con el cliente') {
         return (groupedByStatus[col.name]?.length || 0) > 0
       }
       return true
@@ -69,6 +75,62 @@ export default function PizarraBoard() {
         <div className="flex-1 flex gap-4 overflow-x-auto pb-2 scrollbar-thin items-start">
           {diagCols.map((col: any) => {
             const equipmentsInCol = groupedByStatus[col.name] || []
+
+            // Caso especial: Coordinación con el cliente (Pestaña plegable)
+            if (col.name === 'Coordinación con el cliente') {
+              return (
+                <div
+                  key={col.id}
+                  className={`flex flex-col border border-neon-purple/30 rounded-xl transition-all duration-300 ${
+                    isCoordinationOpen ? 'flex-1 min-w-[280px] bg-bg-surface/40' : 'w-12 bg-bg-surface/20'
+                  }`}
+                >
+                  <button
+                    onClick={() => setIsCoordinationOpen(!isCoordinationOpen)}
+                    className={`flex items-center justify-between p-3 h-full outline-none group ${
+                      !isCoordinationOpen ? 'flex-col gap-8' : 'border-b border-border-subtle/60'
+                    }`}
+                  >
+                    {isCoordinationOpen ? (
+                      <>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-neon-purple flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-neon-purple shadow-[0_0_8px_#9D4EDD]" />
+                          {col.name}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono font-bold bg-bg-base border border-neon-purple/30 text-neon-purple px-2 py-0.5 rounded-full">
+                            {equipmentsInCol.length}
+                          </span>
+                          <span className="text-text-muted text-xs group-hover:text-neon-purple transition-colors">❮</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex flex-col items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-neon-purple shadow-[0_0_10px_#9D4EDD] animate-pulse" />
+                          <span className="text-[10px] font-mono font-bold text-neon-purple bg-bg-base border border-neon-purple/30 px-1.5 py-0.5 rounded-full">
+                            {equipmentsInCol.length}
+                          </span>
+                        </div>
+                        <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] font-bold uppercase tracking-[0.2em] text-neon-purple/70 group-hover:text-neon-purple transition-colors whitespace-nowrap">
+                          {col.name}
+                        </span>
+                        <span className="text-text-muted text-xs group-hover:text-neon-purple transition-colors">❯</span>
+                      </>
+                    )}
+                  </button>
+
+                  {isCoordinationOpen && (
+                    <div className="p-4 space-y-1 overflow-y-auto flex-1 pr-1 scrollbar-thin min-h-[80px]">
+                      {equipmentsInCol.map((eq: any) => (
+                        <PizarraCard key={eq.id} equipment={eq} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
             return (
               <div
                 key={col.id}
