@@ -18,7 +18,7 @@ export async function GET(
 
     // 2. Buscar todos los registros con ese número de serie
     // Usamos ILIKE para que no importe mayúsculas/minúsculas y trim para evitar espacios
-    const { data: interventions, error: intError } = await supabase
+    const { data: rawInterventions, error: intError } = await supabase
       .from('equipment_with_status')
       .select('*')
       .ilike('serial_number', serial.trim())
@@ -29,7 +29,9 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Error al buscar historial por serie' }, { status: 500 })
     }
 
-    if (!interventions || interventions.length === 0) {
+    const interventions = (rawInterventions || []) as any[]
+
+    if (interventions.length === 0) {
       return NextResponse.json({ 
         success: true, 
         data: { 
