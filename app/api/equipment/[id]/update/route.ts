@@ -58,6 +58,15 @@ export async function PUT(
     if (body.date_in !== undefined) updateData.date_in = body.date_in
     if (body.is_priority !== undefined) updateData.is_priority = body.is_priority
 
+    // Timestamps operativos (solo superadmin puede enviarlos)
+    if (body.start_diagnosis_at !== undefined) updateData.start_diagnosis_at = body.start_diagnosis_at
+    if (body.end_diagnosis_at !== undefined) updateData.end_diagnosis_at = body.end_diagnosis_at
+    if (body.pending_approval_at !== undefined) updateData.pending_approval_at = body.pending_approval_at
+    if (body.approval_at !== undefined) updateData.approval_at = body.approval_at
+    if (body.start_maintenance_at !== undefined) updateData.start_maintenance_at = body.start_maintenance_at
+    if (body.end_maintenance_at !== undefined) updateData.end_maintenance_at = body.end_maintenance_at
+    if (body.finalized_at !== undefined) updateData.finalized_at = body.finalized_at
+
     // 5. Validaciones mínimas
     if (updateData.client_name === '') return NextResponse.json({ success: false, error: 'El cliente no puede estar vacío' }, { status: 400 })
     if (updateData.fr_number === '') return NextResponse.json({ success: false, error: 'El número de FR no puede estar vacío' }, { status: 400 })

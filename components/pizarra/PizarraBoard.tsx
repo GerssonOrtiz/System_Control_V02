@@ -5,9 +5,21 @@ import React, { useState, useEffect } from 'react'
 import { useRealtimePizarra } from '@/hooks/useRealtimePizarra'
 import PizarraCard from './PizarraCard'
 
-export default function PizarraBoard() {
+export default function PizarraBoard({ searchQuery = '' }: { searchQuery?: string }) {
   const { groupedByStatus, isLoading } = useRealtimePizarra()
   const [columns, setColumns] = useState<any[]>([])
+
+  // Helper to filter equipment based on searchQuery
+  const filterEquipments = (equipments: any[]) => {
+    if (!searchQuery) return equipments
+    const q = searchQuery.toLowerCase().trim()
+    return equipments.filter((eq: any) => 
+      eq.fr_number?.toLowerCase().includes(q) ||
+      eq.client_name?.toLowerCase().includes(q) ||
+      eq.brand?.toLowerCase().includes(q) ||
+      eq.model?.toLowerCase().includes(q)
+    )
+  }
 
   // Load workflow states for the columns
   useEffect(() => {
@@ -68,7 +80,7 @@ export default function PizarraBoard() {
         </div>
         <div className="flex-1 flex gap-4 overflow-x-auto pb-2 scrollbar-thin items-start">
           {diagCols.map((col: any) => {
-            const equipmentsInCol = groupedByStatus[col.name] || []
+            const equipmentsInCol = filterEquipments(groupedByStatus[col.name] || [])
             return (
               <div
                 key={col.id}
@@ -116,7 +128,7 @@ export default function PizarraBoard() {
         </div>
         <div className="flex-1 flex gap-4 overflow-x-auto pb-2 scrollbar-thin items-start">
           {servCols.map((col: any) => {
-            const equipmentsInCol = groupedByStatus[col.name] || []
+            const equipmentsInCol = filterEquipments(groupedByStatus[col.name] || [])
             return (
               <div
                 key={col.id}

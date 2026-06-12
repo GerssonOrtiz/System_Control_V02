@@ -50,6 +50,7 @@ function LimaClock() {
 
 export default function PizarraPage() {
   const [isKioskMode, setIsKioskMode] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const content = (
     <div className={`flex flex-col bg-bg-base font-sans text-text-primary ${isKioskMode ? 'fixed inset-0 z-[9999]' : 'min-h-screen'}`}>
@@ -66,6 +67,28 @@ export default function PizarraPage() {
               Pizarra de Taller — Tiempo Real
             </p>
           </div>
+        </div>
+
+        {/* Buscador Pizarra */}
+        <div className="hidden md:flex flex-1 max-w-md mx-8 relative group">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm transition-colors group-focus-within:text-neon-blue">
+            🔍
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por FR, cliente, marca, modelo..."
+            className="w-full bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg pl-9 pr-4 py-2 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:shadow-[0_0_10px_rgba(0,229,255,0.1)] transition-all font-sans"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-red-400 text-xs transition-colors"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Acciones de Pizarra */}
@@ -86,12 +109,19 @@ export default function PizarraPage() {
       <div className="flex items-center gap-3 px-6 py-2 bg-bg-base border-b border-border-subtle/30 text-[10px] uppercase tracking-widest text-text-muted font-mono flex-shrink-0">
         <span className="w-2 h-2 rounded-full bg-neon-blue animate-pulse shadow-neon-blue inline-block" />
         Conexión Realtime Activa
-        <span className="ml-auto">Actualización automática • Sin recarga de página</span>
+        <span className="ml-auto flex items-center gap-4">
+          {searchQuery && (
+            <span className="text-neon-blue font-bold">
+              🔍 Filtrando: "{searchQuery}"
+            </span>
+          )}
+          <span>Actualización automática • Sin recarga de página</span>
+        </span>
       </div>
 
       {/* ─── Tablero Principal ─── */}
       <main className="flex-1 overflow-hidden px-4 py-4">
-        <PizarraBoard />
+        <PizarraBoard searchQuery={searchQuery} />
       </main>
 
       {/* ─── Footer ─── */}

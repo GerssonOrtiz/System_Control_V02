@@ -43,11 +43,33 @@ export default function EquipmentDetail({
   const [editConditionIn, setEditConditionIn] = useState('')
   const [editObservations, setEditObservations] = useState('')
 
+  // Operational timestamps states
+  const [editStartDiag, setEditStartDiag] = useState('')
+  const [editEndDiag, setEditEndDiag] = useState('')
+  const [editPendingAppr, setEditPendingAppr] = useState('')
+  const [editAppr, setEditAppr] = useState('')
+  const [editStartMaint, setEditStartMaint] = useState('')
+  const [editEndMaint, setEditEndMaint] = useState('')
+  const [editFinalized, setEditFinalized] = useState('')
+
   if (!equipmentId) return null
 
   const handleStatusChangeSuccess = () => {
     mutate()
     if (onStatusUpdated) onStatusUpdated()
+  }
+
+  // Helper to format date for datetime-local input
+  const formatToLocalISO = (dateStr: string | null) => {
+    if (!dateStr) return ''
+    try {
+      const d = new Date(dateStr)
+      const offset = d.getTimezoneOffset()
+      const localDate = new Date(d.getTime() - (offset * 60 * 1000))
+      return localDate.toISOString().slice(0, 16)
+    } catch {
+      return ''
+    }
   }
 
   // Format date to local Lima format
@@ -92,6 +114,16 @@ export default function EquipmentDetail({
     setEditAccessories(equipment.accessories || '')
     setEditConditionIn(equipment.condition_in || '')
     setEditObservations(equipment.additional_observations || '')
+
+    // Initialize timestamps
+    setEditStartDiag(formatToLocalISO(equipment.start_diagnosis_at))
+    setEditEndDiag(formatToLocalISO(equipment.end_diagnosis_at))
+    setEditPendingAppr(formatToLocalISO(equipment.pending_approval_at))
+    setEditAppr(formatToLocalISO(equipment.approval_at))
+    setEditStartMaint(formatToLocalISO(equipment.start_maintenance_at))
+    setEditEndMaint(formatToLocalISO(equipment.end_maintenance_at))
+    setEditFinalized(formatToLocalISO(equipment.finalized_at))
+
     setIsEditing(true)
   }
 
@@ -115,6 +147,14 @@ export default function EquipmentDetail({
           accessories: editAccessories,
           condition_in: editConditionIn,
           additional_observations: editObservations,
+          // Timestamps operativos
+          start_diagnosis_at: editStartDiag ? new Date(editStartDiag).toISOString() : null,
+          end_diagnosis_at: editEndDiag ? new Date(editEndDiag).toISOString() : null,
+          pending_approval_at: editPendingAppr ? new Date(editPendingAppr).toISOString() : null,
+          approval_at: editAppr ? new Date(editAppr).toISOString() : null,
+          start_maintenance_at: editStartMaint ? new Date(editStartMaint).toISOString() : null,
+          end_maintenance_at: editEndMaint ? new Date(editEndMaint).toISOString() : null,
+          finalized_at: editFinalized ? new Date(editFinalized).toISOString() : null,
         })
       })
 
@@ -358,27 +398,99 @@ export default function EquipmentDetail({
                       )}
 
                       <span className="text-text-secondary font-semibold uppercase">Diagnóstico:</span>
-                      <span className="col-span-2">{equipment.start_diagnosis_at ? `${formatDate(equipment.start_diagnosis_at)} (Inicio)` : 'PENDIENTE'}</span>
+                      {isEditing ? (
+                        <div className="col-span-2 flex flex-col gap-1">
+                          <input
+                            type="datetime-local"
+                            value={editStartDiag}
+                            onChange={(e) => setEditStartDiag(e.target.value)}
+                            className="bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                          <input
+                            type="datetime-local"
+                            value={editEndDiag}
+                            onChange={(e) => setEditEndDiag(e.target.value)}
+                            className="bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                        </div>
+                      ) : (
+                        <span className="col-span-2">
+                          {equipment.start_diagnosis_at ? `${formatDate(equipment.start_diagnosis_at)} (Inicio)` : 'PENDIENTE'}
+                          {equipment.end_diagnosis_at && <><br/>{formatDate(equipment.end_diagnosis_at)} (Fin)</>}
+                        </span>
+                      )}
 
                       <span className="text-text-secondary font-semibold uppercase">Mantenimiento:</span>
-                      <span className="col-span-2">{equipment.start_maintenance_at ? `${formatDate(equipment.start_maintenance_at)} (Inicio)` : 'PENDIENTE'}</span>
+                      {isEditing ? (
+                        <div className="col-span-2 flex flex-col gap-1">
+                          <input
+                            type="datetime-local"
+                            value={editStartMaint}
+                            onChange={(e) => setEditStartMaint(e.target.value)}
+                            className="bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                          <input
+                            type="datetime-local"
+                            value={editEndMaint}
+                            onChange={(e) => setEditEndMaint(e.target.value)}
+                            className="bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                        </div>
+                      ) : (
+                        <span className="col-span-2">
+                          {equipment.start_maintenance_at ? `${formatDate(equipment.start_maintenance_at)} (Inicio)` : 'PENDIENTE'}
+                          {equipment.end_maintenance_at && <><br/>{formatDate(equipment.end_maintenance_at)} (Fin)</>}
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="text-sm font-bold text-neon-blue uppercase tracking-wider border-b border-border-subtle/50 pb-1 pt-4">Seguimiento por Fases</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2">
-                      <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
-                        <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 1:<br/>Ingreso → Pendiente</span>
-                        <span className="text-base font-mono font-bold text-neon-blue">{equipment.phase_1_days} <small className="text-[9px]">DÍAS</small></span>
+                    {isEditing ? (
+                      <div className="grid grid-cols-2 gap-2 py-2">
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-text-secondary font-bold uppercase">Pendiente Aprob.</label>
+                          <input
+                            type="datetime-local"
+                            value={editPendingAppr}
+                            onChange={(e) => setEditPendingAppr(e.target.value)}
+                            className="w-full bg-bg-base border border-border-subtle rounded px-2 py-1 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] text-text-secondary font-bold uppercase">Aprobación</label>
+                          <input
+                            type="datetime-local"
+                            value={editAppr}
+                            onChange={(e) => setEditAppr(e.target.value)}
+                            className="w-full bg-bg-base border border-border-subtle rounded px-2 py-1 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                        </div>
+                        <div className="space-y-1 col-span-2">
+                          <label className="text-[9px] text-text-secondary font-bold uppercase">Finalizado/Entregado</label>
+                          <input
+                            type="datetime-local"
+                            value={editFinalized}
+                            onChange={(e) => setEditFinalized(e.target.value)}
+                            className="w-full bg-bg-base border border-border-subtle rounded px-2 py-1 text-[10px] focus:border-neon-blue focus:outline-none text-text-primary"
+                          />
+                        </div>
                       </div>
-                      <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
-                        <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 2:<br/>Evaluación → Aprobación</span>
-                        <span className="text-base font-mono font-bold text-neon-purple">{equipment.phase_2_days} <small className="text-[9px]">DÍAS</small></span>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2">
+                        <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
+                          <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 1:<br/>Ingreso → Pendiente</span>
+                          <span className="text-base font-mono font-bold text-neon-blue">{equipment.phase_1_days} <small className="text-[9px]">DÍAS</small></span>
+                        </div>
+                        <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
+                          <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 2:<br/>Evaluación → Aprobación</span>
+                          <span className="text-base font-mono font-bold text-neon-purple">{equipment.phase_2_days} <small className="text-[9px]">DÍAS</small></span>
+                        </div>
+                        <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
+                          <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 3:<br/>Aprobación → Entrega</span>
+                          <span className="text-base font-mono font-bold text-emerald-400">{equipment.phase_3_days} <small className="text-[9px]">DÍAS</small></span>
+                        </div>
                       </div>
-                      <div className="bg-bg-base/40 p-2 rounded-lg border border-border-subtle flex flex-col items-center text-center">
-                        <span className="text-[9px] text-text-secondary font-bold uppercase mb-1 leading-tight">Fase 3:<br/>Aprobación → Entrega</span>
-                        <span className="text-base font-mono font-bold text-emerald-400">{equipment.phase_3_days} <small className="text-[9px]">DÍAS</small></span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
