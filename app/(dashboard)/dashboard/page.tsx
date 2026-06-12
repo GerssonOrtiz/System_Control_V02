@@ -1,7 +1,7 @@
 // app/(dashboard)/dashboard/page.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useDashboardStats, useEquipmentList } from '@/hooks/useEquipmentList'
 import EquipmentTable from '@/components/equipment/EquipmentTable'
 
@@ -9,6 +9,10 @@ export default function DashboardPage() {
   const [activePage, setActivePage] = useState(0)
   const [statusFilter, setStatusFilter] = useState('')
   const [serviceFilter, setServiceFilter] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[] | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { stats, isLoading: loadingStats, mutate: mutateStats } = useDashboardStats()
   const { equipments, total, totalPages, isLoading: loadingEquips, mutate: mutateEquips } = useEquipmentList(
@@ -18,10 +22,47 @@ export default function DashboardPage() {
     serviceFilter
   )
 
+  // Búsqueda con debounce de 350ms
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSearchResults(null)
+      return
+    }
+
+    searchTimer.current = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const res = await fetch(`/api/equipment/search?q=${encodeURIComponent(searchQuery.trim())}&include_delivered=true`)
+        const data = await res.json()
+        if (data.success) {
+          setSearchResults(data.data.results || [])
+        } else {
+          setSearchResults([])
+        }
+      } catch {
+        setSearchResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 350)
+
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
+    }
+  }, [searchQuery])
+
   const handleUpdateSuccess = () => {
     mutateStats()
     mutateEquips()
   }
+
+  // Determina qué lista mostrar
+  const displayEquipments = searchResults !== null ? searchResults : equipments
+  const displayTotal = searchResults !== null ? searchResults.length : total
+  const isInSearchMode = searchResults !== null
+  const showLoader = isSearching || (loadingEquips && !isInSearchMode)
 
   // Lista de estados para el filtro (podría venir de una tabla maestra en el futuro)
   const statusOptions = [
@@ -88,48 +129,82 @@ export default function DashboardPage() {
 
       {/* Main Global Equipment Section */}
       <div className="bg-bg-surface border border-border-subtle rounded-xl p-5 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border-subtle/30 pb-4">
           <div className="space-y-1">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-neon-blue">📋 Registro General de Equipos ({total})</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-neon-blue">📋 Registro General de Equipos ({displayTotal})</h2>
             <p className="text-[10px] text-text-muted">Filtrando en toda la base de datos. Ordenado por FR más reciente.</p>
           </div>
           
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setActivePage(0); }}
-              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
-            >
-              <option value="">Todos los Estados</option>
-              {statusOptions.map((opt: any) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-            <select
-              value={serviceFilter}
-              onChange={(e) => { setServiceFilter(e.target.value); setActivePage(0); }}
-              className="bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
-            >
-              <option value="">Todos los Servicios</option>
-              {serviceOptions.map((opt: any) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            {/* Buscador */}
+            <div className="relative w-full sm:w-64">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-xs">🔍</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar FR, cliente..."
+                className="w-full bg-bg-base/60 border border-border-subtle rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+              />
+              {isSearching && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neon-blue animate-pulse font-mono">...</span>
+              )}
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2 w-full sm:w-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); setActivePage(0); }}
+                className="flex-1 sm:flex-none bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+              >
+                <option value="">Todos los Estados</option>
+                {statusOptions.map((opt: any) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+              <select
+                value={serviceFilter}
+                onChange={(e) => { setServiceFilter(e.target.value); setActivePage(0); }}
+                className="flex-1 sm:flex-none bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+              >
+                <option value="">Todos los Servicios</option>
+                {serviceOptions.map((opt: any) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
+        {/* Indicadores de búsqueda activa */}
+        {isInSearchMode && (
+          <div className="px-1">
+            <span className="text-[10px] text-text-secondary font-mono">
+              Resultados para: <span className="text-neon-blue font-bold">"{searchQuery}"</span>
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="ml-2 text-text-muted hover:text-red-400 transition-colors"
+              >
+                [Limpiar]
+              </button>
+            </span>
+          </div>
+        )}
+
         {/* Equipment Table */}
-        {loadingEquips ? (
+        {showLoader ? (
           <div className="flex justify-center items-center py-12">
-            <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">Cargando base de datos completa...</span>
+            <span className="text-neon-blue animate-pulse font-mono text-xs uppercase tracking-widest">
+              {isSearching ? 'Buscando en base de datos...' : 'Cargando registros...'}
+            </span>
           </div>
         ) : (
           <EquipmentTable
-            equipments={equipments}
-            currentPage={activePage}
-            totalPages={totalPages}
-            onPageChange={setActivePage}
+            equipments={displayEquipments}
+            currentPage={isInSearchMode ? 0 : activePage}
+            totalPages={isInSearchMode ? 1 : totalPages}
+            onPageChange={isInSearchMode ? undefined : setActivePage}
             onUpdateSuccess={handleUpdateSuccess}
           />
         )}
