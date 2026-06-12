@@ -14,6 +14,7 @@ interface StatsData {
   by_status: Array<{ status_name: string; count: number; color: string }>
   by_service_type: Array<{ service_type: string; count: number }>
   by_brand: Array<{ brand: string; count: number }>
+  by_company: Array<{ name: string; total: number; by_status: Array<{ status: string; count: number }> }>
   delayed_equipment: Array<{ fr_number: string; client_name: string; status_name: string; days_elapsed: number }>
 }
 
@@ -21,6 +22,8 @@ export default function EstadisticasPage() {
   const { role } = useUser()
   const [stats, setStats] = useState<StatsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
+  const [companySearch, setCompanySearch] = useState('')
 
   const fetchStats = async () => {
     try {
@@ -248,39 +251,112 @@ export default function EstadisticasPage() {
         </div>
       </div>
 
-      {/* ─── LISTA DE EQUIPOS ATRASADOS ─── */}
-      <section className="bg-bg-surface/50 border border-red-500/20 rounded-xl p-6 shadow-[0_0_20px_rgba(239,68,68,0.02)]">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-red-500 border-b border-red-500/20 pb-3 mb-4 flex items-center gap-2">
-          🚨 Alerta de Equipos Críticos Atrasados (+5 días)
-        </h2>
-        {stats.delayed_equipment.length === 0 ? (
-          <p className="text-[11px] text-text-muted uppercase italic">
-            Sin equipos retrasados en este momento. Eficiencia óptima.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border-subtle text-[10px] uppercase tracking-widest text-text-muted">
-                  <th className="py-2.5">Ficha FR</th>
-                  <th className="py-2.5">Cliente</th>
-                  <th className="py-2.5">Estado</th>
-                  <th className="py-2.5 text-right">Días</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle/30 text-xs">
-                {stats.delayed_equipment.map((eq) => (
-                  <tr key={eq.fr_number} className="hover:bg-red-500/5 text-red-300 font-mono transition-colors">
-                    <td className="py-3 font-semibold tracking-wider text-red-400">{eq.fr_number}</td>
-                    <td className="py-3 uppercase truncate max-w-[200px]">{eq.client_name}</td>
-                    <td className="py-3 uppercase text-[10px]">{eq.status_name}</td>
-                    <td className="py-3 text-right text-red-500 font-extrabold">{eq.days_elapsed}d</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* ─── ESTADÍSTICAS POR EMPRESA ─── */}
+      <section className="bg-bg-surface/50 border border-border-subtle rounded-xl p-6 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border-subtle/30 pb-4">
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-neon-blue flex items-center gap-2">
+              🏢 Menú Estadístico por Empresa
+            </h2>
+            <p className="text-[10px] text-text-muted uppercase">Análisis detallado de equipos por cliente y estado operativo.</p>
           </div>
-        )}
+          
+          <div className="relative w-full md:w-64">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-xs">🔍</span>
+            <input
+              type="text"
+              value={companySearch}
+              onChange={(e) => setCompanySearch(e.target.value.toUpperCase())}
+              placeholder="Buscar empresa..."
+              className="w-full bg-bg-base/60 border border-border-subtle rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Lista de Empresas */}
+          <div className="bg-bg-base/30 rounded-xl border border-border-subtle overflow-hidden flex flex-col h-[400px]">
+            <div className="px-4 py-2 bg-bg-surface/50 border-b border-border-subtle text-[10px] font-bold text-text-secondary uppercase">
+              Lista de Clientes
+            </div>
+            <div className="flex-1 overflow-y-auto scrollbar-thin divide-y divide-border-subtle/30">
+              {stats.by_company
+                .filter(c => c.name.includes(companySearch))
+                .map((company) => (
+                  <button
+                    key={company.name}
+                    onClick={() => setSelectedCompany(company.name)}
+                    className={`w-full text-left px-4 py-3 hover:bg-neon-blue/5 transition-colors flex justify-between items-center ${
+                      selectedCompany === company.name ? 'bg-neon-blue/10 border-l-2 border-neon-blue' : ''
+                    }`}
+                  >
+                    <span className={`text-xs font-medium truncate max-w-[180px] ${selectedCompany === company.name ? 'text-neon-blue' : 'text-text-primary'}`}>
+                      {company.name}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold bg-bg-surface border border-border-subtle px-2 py-0.5 rounded-full text-text-secondary">
+                      {company.total}
+                    </span>
+                  </button>
+                ))}
+            </div>
+          </div>
+
+          {/* Detalle Estadístico */}
+          <div className="md:col-span-2 bg-bg-base/20 rounded-xl border border-dashed border-border-subtle/40 p-6 flex flex-col justify-center min-h-[400px]">
+            {!selectedCompany ? (
+              <div className="text-center space-y-4 py-12">
+                <div className="text-4xl opacity-20">📊</div>
+                <p className="text-xs text-text-muted uppercase tracking-widest">Selecciona una empresa para ver su desglose estadístico</p>
+              </div>
+            ) : (() => {
+              const company = stats.by_company.find(c => c.name === selectedCompany)
+              if (!company) return null
+              return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="flex justify-between items-end border-b border-border-subtle/50 pb-3">
+                    <div>
+                      <h4 className="text-lg font-bold text-text-primary">{company.name}</h4>
+                      <p className="text-[10px] text-text-muted uppercase">Total histórico registrado: <span className="text-neon-blue font-mono">{company.total} equipos</span></p>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedCompany(null)}
+                      className="text-[10px] text-red-400 hover:underline uppercase font-bold"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {company.by_status.map((item) => {
+                      const percentage = Math.round((item.count / company.total) * 100)
+                      const statusColor = stats.by_status.find(s => s.status_name === item.status) ?.color || '#6B7280'
+                      return (
+                        <div key={item.status} className="bg-bg-surface/50 border border-border-subtle rounded-lg p-4 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-text-secondary uppercase flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColor }} />
+                              {item.status}
+                            </span>
+                            <span className="text-xs font-mono font-bold text-text-primary">{item.count}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-1.5 bg-bg-base rounded-full overflow-hidden">
+                              <div 
+                                className="h-full rounded-full transition-all duration-700"
+                                style={{ width: `${percentage}%`, backgroundColor: statusColor }}
+                              />
+                            </div>
+                            <span className="text-[10px] font-mono text-text-muted">{percentage}%</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        </div>
       </section>
     </div>
   )

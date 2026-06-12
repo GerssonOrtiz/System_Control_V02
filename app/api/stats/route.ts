@@ -106,6 +106,23 @@ export async function GET(request: NextRequest) {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
 
+    // 4b. Agrupar por Empresa (Cliente)
+    const companyStats: Record<string, { name: string; total: number; by_status: Record<string, number> }> = {}
+    for (const e of equipmentList) {
+      const company = e.client_name || 'DESCONOCIDO'
+      if (!companyStats[company]) {
+        companyStats[company] = { name: company, total: 0, by_status: {} }
+      }
+      companyStats[company].total++
+      companyStats[company].by_status[e.status_name] = (companyStats[company].by_status[e.status_name] || 0) + 1
+    }
+    const by_company = Object.values(companyStats)
+      .sort((a, b) => b.total - a.total)
+      .map(c => ({
+        ...c,
+        by_status: Object.entries(c.by_status).map(([status, count]) => ({ status, count }))
+      }))
+
     // 5. Equipos entregados este mes
     const now = new Date()
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
@@ -166,6 +183,7 @@ export async function GET(request: NextRequest) {
         by_service_type,
         by_brand,
         by_technician,
+        by_company,
         delayed_equipment
       }
     })
