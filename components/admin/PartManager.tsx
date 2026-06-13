@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { CatalogBrand, CatalogModel, Part } from '@/types/catalog'
 import { toast } from 'sonner'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { Database } from '@/types/database.types'
 
 export default function PartManager() {
-  const supabase = createClient()
+  const supabase: SupabaseClient<Database> = createClient()
   const [parts, setParts] = useState<Part[]>([])
   const [brands, setBrands] = useState<CatalogBrand[]>([])
   const [models, setModels] = useState<CatalogModel[]>([])
