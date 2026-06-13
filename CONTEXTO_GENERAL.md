@@ -22,7 +22,12 @@ CABELAB v2.0 es una plataforma integral diseñada para digitalizar y automatizar
     2.  **Fase 2:** Evaluación → Aprobación.
     3.  **Fase 3:** Aprobación → Entrega.
 
-## 4. Roles y Autenticación
+## 4. Catálogo Técnico e Inteligencia (Nuevo v2.1)
+*   **Catálogo Maestro de Repuestos:** Base de datos centralizada de piezas con códigos únicos, nombres oficiales y especificaciones técnicas.
+*   **Motor de Compatibilidad:** Relación inteligente entre repuestos y modelos de máquinas. El sistema filtra automáticamente qué piezas son aptas para cada equipo.
+*   **Normalización de Activos:** Registro controlado de Marcas y Modelos para evitar errores de escritura y duplicidad en los datos del taller.
+
+## 5. Roles y Autenticación
 *   **Login Transparente:** Los usuarios entran con su nombre de usuario. Internamente, el sistema gestiona un correo virtual (`usuario@cabelab.local`) para Supabase Auth.
 *   **Superadmin (Venllas):** Gestión total de usuarios, workflow y catálogo de personal técnico.
 *   **Operaciones/Almacen/Recepcion:** Permisos restringidos según la fase del equipo.

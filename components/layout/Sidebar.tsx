@@ -62,6 +62,12 @@ const ALL_SIDEBAR_ITEMS: Record<string, SidebarItem> = {
     href: '/admin/workflow',
     icon: '⚙️',
   },
+  catalogo: {
+    key: 'catalogo',
+    label: 'Catálogo',
+    href: '/admin/catalog',
+    icon: '📦',
+  },
   estadisticas: {
     key: 'estadisticas',
     label: 'Estadísticas',
