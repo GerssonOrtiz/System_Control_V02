@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('status_name', statusFilter)
     }
     if (serviceFilter) {
-      query = query.eq('service_type', serviceFilter)
+      query = query.eq('service_type', serviceFilter as any)
     }
 
     // Paginación
