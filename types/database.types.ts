@@ -196,15 +196,98 @@ export type Database = {
           id?: number
           equipment_id?: string
           previous_status?: string | null
-          new_status?: string
+          new_status: string
           changed_by_id?: string | null
-          changed_by_username?: string
+          changed_by_username: string
           is_override?: boolean
           override_reason?: string | null
           timestamp?: string
         }
       }
-    }
+      catalog_brands: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+        }
+      }
+      catalog_models: {
+        Row: {
+          id: string
+          brand_id: string
+          name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          brand_id: string
+          name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          brand_id?: string
+          name?: string
+          created_at?: string
+        }
+      }
+      parts_catalog: {
+        Row: {
+          id: string
+          part_number: string
+          name: string
+          specifications: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          part_number: string
+          name: string
+          specifications?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          part_number?: string
+          name?: string
+          specifications?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      part_compatibilities: {
+        Row: {
+          id: string
+          part_id: string
+          model_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          part_id: string
+          model_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          part_id?: string
+          model_id?: string
+          created_at?: string
+        }
+      }
+      }
     Views: {
       equipment_with_status: {
         Row: {
