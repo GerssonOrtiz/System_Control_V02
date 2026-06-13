@@ -19,15 +19,21 @@ export async function DELETE(
     if (activeProfile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
 
     // Borrado físico (solo si no tiene equipos asociados, si no fallará por FK - es más seguro)
+    const technicianId = parseInt(id, 10)
+    
+    if (isNaN(technicianId)) {
+      return NextResponse.json({ success: false, error: 'ID inválido' }, { status: 400 })
+    }
+
     const { error } = await supabase
       .from('technicians')
       .delete()
-      .eq('id', id)
+      .eq('id', technicianId)
 
     if (error) {
       // Si falla por integridad (FK), desactivarlo en lugar de borrarlo
       if (error.code === '23503') {
-        await (supabase.from('technicians') as any).update({ is_active: false }).eq('id', id)
+        await supabase.from('technicians').update({ is_active: false }).eq('id', technicianId)
         return NextResponse.json({ success: true, message: 'Técnico desactivado (tiene historial)' })
       }
       throw error

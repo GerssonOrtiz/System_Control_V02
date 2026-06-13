@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
     const activeProfile = profile as any
     if (activeProfile?.role !== 'superadmin') return NextResponse.json({ success: false, error: 'Acceso denegado' }, { status: 403 })
 
-    const { data: techs, error } = await (supabase
-      .from('technicians') as any)
+    const { data: techs, error } = await supabase
+      .from('technicians')
       .select('*')
       .order('name')
 
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Nombre inválido' }, { status: 400 })
     }
 
-    const { data, error } = await (supabase
-      .from('technicians') as any)
+    const { data, error } = await supabase
+      .from('technicians')
       .insert({ name: name.trim().toUpperCase() })
       .select()
       .single()
