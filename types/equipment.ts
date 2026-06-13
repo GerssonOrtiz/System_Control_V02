@@ -88,7 +88,9 @@ export const OVERDUE_THRESHOLD_DAYS = 5
 
 /** Determina si un equipo está atrasado */
 export function isEquipmentOverdue(equipment: EquipmentWithStatus): boolean {
-  return !equipment.is_terminal && equipment.days_elapsed > OVERDUE_THRESHOLD_DAYS
+  const daysElapsed = equipment.days_elapsed ?? 0
+  const isTerminal = equipment.is_terminal ?? false
+  return !isTerminal && daysElapsed > OVERDUE_THRESHOLD_DAYS
 }
 
 /** Roles que pueden ver TODOS los equipos (sin filtro por estado) */
