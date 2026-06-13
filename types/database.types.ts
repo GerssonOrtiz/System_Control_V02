@@ -262,6 +262,27 @@ export type Database = {
           }
         ]
       }
+      technicians: {
+        Row: {
+          id: number
+          name: string
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          name: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          name?: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           created_at: string
