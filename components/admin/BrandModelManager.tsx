@@ -30,7 +30,7 @@ export default function BrandModelManager() {
 
   async function handleAddBrand() {
     if (!newBrand) return
-    const { error } = await supabase.from('catalog_brands').insert({ name: newBrand.toUpperCase() })
+    const { error } = await supabase.from('catalog_brands').insert([{ name: newBrand.toUpperCase() }])
     if (error) {
       toast.error('Error al añadir marca: ' + error.message)
     } else {
@@ -42,10 +42,10 @@ export default function BrandModelManager() {
 
   async function handleAddModel() {
     if (!newModel.brandId || !newModel.name) return
-    const { error } = await supabase.from('catalog_models').insert({ 
+    const { error } = await supabase.from('catalog_models').insert([{ 
       brand_id: newModel.brandId, 
       name: newModel.name.toUpperCase() 
-    })
+    }])
     if (error) {
       toast.error('Error al añadir modelo: ' + error.message)
     } else {

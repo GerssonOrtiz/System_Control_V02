@@ -44,11 +44,11 @@ export default function PartManager() {
     // 1. Insertar la pieza
     const { data: insertedPart, error: partError } = await supabase
       .from('parts_catalog')
-      .insert({
+      .insert([{
         part_number: newPart.part_number.toUpperCase(),
         name: newPart.name.toUpperCase(),
         specifications: newPart.specifications
-      })
+      }])
       .select()
       .single()
 

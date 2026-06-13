@@ -1,10 +1,4 @@
 // types/database.types.ts
-// Este archivo se genera automáticamente con Supabase CLI
-// Ejecutar cuando el esquema esté creado en Supabase:
-//   npx supabase gen types typescript --project-id <ID> > types/database.types.ts
-//
-// Por ahora se usa un placeholder hasta tener el proyecto de Supabase configurado.
-
 export type Database = {
   public: {
     Tables: {
@@ -287,7 +281,7 @@ export type Database = {
           created_at?: string
         }
       }
-      }
+    }
     Views: {
       equipment_with_status: {
         Row: {
