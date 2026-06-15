@@ -8,6 +8,7 @@ import { useEquipmentDetail } from '@/hooks/useEquipmentList'
 import { useUser } from '@/hooks/useUser'
 import StatusBadge from './StatusBadge'
 import StatusChangeModal from './StatusChangeModal'
+import ClientSelector from './ClientSelector'
 
 interface EquipmentDetailProps {
   isOpen: boolean
@@ -285,12 +286,12 @@ export default function EquipmentDetail({
 
                       <span className="text-text-secondary font-semibold uppercase">Cliente:</span>
                       {isEditing ? (
-                        <input
-                          type="text"
-                          value={editClientName}
-                          onChange={(e) => setEditClientName(e.target.value)}
-                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
-                        />
+                        <div className="col-span-2">
+                          <ClientSelector
+                            value={editClientName}
+                            onChange={(val) => setEditClientName(val)}
+                          />
+                        </div>
                       ) : (
                         <span className="col-span-2 font-medium">{equipment.client_name}</span>
                       )}

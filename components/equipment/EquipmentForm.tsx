@@ -2,10 +2,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { createEquipmentSchema, CreateEquipmentInput } from '@/lib/validations/equipment.schema'
+import ClientSelector from './ClientSelector'
 
 interface EquipmentFormProps {
   onSuccess?: () => void
@@ -19,6 +20,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<CreateEquipmentInput>({
     resolver: zodResolver(createEquipmentSchema),
@@ -106,21 +108,18 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
 
         {/* Cliente */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Nombre del Cliente *
-          </label>
-          <input
-            type="text"
-            {...register('client_name')}
-            placeholder="ej: ACME SAC"
-            className={`w-full bg-bg-base/50 border ${
-              errors.client_name ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
-            } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
-            autoComplete="off"
+          <Controller
+            name="client_name"
+            control={control}
+            render={({ field }) => (
+              <ClientSelector
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.client_name?.message}
+                label="Nombre del Cliente *"
+              />
+            )}
           />
-          {errors.client_name && (
-            <p className="text-red-400 text-xs mt-1">{errors.client_name.message}</p>
-          )}
         </div>
 
         {/* Tipo de Servicio */}
