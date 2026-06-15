@@ -210,41 +210,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Alerta Equipos Atrasados */}
-      {stats && stats.delayed_equipment && stats.delayed_equipment.length > 0 && (
-        <div className="bg-bg-surface border border-red-500/30 shadow-neon-red rounded-xl p-5 space-y-4">
-          <div className="flex items-center gap-2 text-red-500">
-            <span className="text-lg">⚠️</span>
-            <h2 className="text-sm font-bold uppercase tracking-wider">Alertas críticas de retraso</h2>
-          </div>
-          <div className="overflow-x-auto border border-red-500/20 rounded-lg bg-bg-base/40">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-red-500/20 bg-red-950/10 text-red-400 font-bold uppercase tracking-wider">
-                  <th className="px-4 py-2.5">Ficha</th>
-                  <th className="px-4 py-2.5">Cliente</th>
-                  <th className="px-4 py-2.5">Estado</th>
-                  <th className="px-4 py-2.5 text-right">Tiempo Retraso</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-red-500/10">
-                {stats.delayed_equipment.map((eq: any, idx: number) => (
-                  <tr key={eq.fr_number || idx} className="hover:bg-red-500/5 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-red-400">{eq.fr_number}</td>
-                    <td className="px-4 py-3 text-text-primary">{eq.client_name}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-[10px] bg-red-500/10 border border-red-500/40 text-red-400 px-2 py-0.5 rounded font-bold uppercase">
-                        {eq.status_name}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-red-500 font-mono">{eq.days_elapsed} días</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
