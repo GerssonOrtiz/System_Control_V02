@@ -215,9 +215,6 @@ export default function EquipmentDetail({
                     <span className="text-xs text-text-secondary font-bold uppercase tracking-wider">Estado Actual</span>
                     <div className="flex items-center gap-2">
                       <StatusBadge status={equipment.status_name} color={equipment.status_color} />
-                      {equipment.days_elapsed > 5 && !equipment.is_terminal && (
-                        <span className="text-red-400 text-xs font-bold animate-pulse">⚠️ ATRASADO ({equipment.days_elapsed} días)</span>
-                      )}
                     </div>
                   </div>
 

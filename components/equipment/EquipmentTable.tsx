@@ -70,14 +70,13 @@ export default function EquipmentTable({
               <th className="px-5 py-3">Marca/Modelo</th>
               <th className="px-5 py-3">Estado</th>
               {showTechs && <th className="px-5 py-3">Técnico</th>}
-              <th className="px-5 py-3">Días</th>
               <th className="px-5 py-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle/50 text-xs">
             {equipments.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-8 text-center text-text-secondary">
+                <td colSpan={showTechs ? 6 : 5} className="px-5 py-8 text-center text-text-secondary">
                   No se encontraron equipos registrados en el sistema.
                 </td>
               </tr>
@@ -115,17 +114,6 @@ export default function EquipmentTable({
                         {eq.maintenance_tech_username || eq.diagnosis_tech_username || '-'}
                       </td>
                     )}
-                    <td className="px-5 py-4">
-                      {isDelayed ? (
-                        <span className="text-red-400 font-bold flex items-center gap-1 animate-pulse">
-                          ⚠️ {eq.days_elapsed}d
-                        </span>
-                      ) : eq.is_terminal ? (
-                        <span className="text-text-muted">Listo</span>
-                      ) : (
-                        <span>{eq.days_elapsed} días</span>
-                      )}
-                    </td>
                     <td className="px-5 py-4 text-right space-x-2">
                       <button
                         onClick={() => handleOpenDetail(eq.id)}
