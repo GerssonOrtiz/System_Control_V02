@@ -14,7 +14,7 @@ export const createEquipmentSchema = z.object({
   accessories: z.string().optional().nullable(),
   condition_in: z.string().optional().nullable(),
   additional_observations: z.string().optional().nullable(),
-  is_priority: z.boolean().optional(),
+  priority_level: z.number().int().min(0).max(3).default(0),
 })
 
 export const updateStatusSchema = z.object({
@@ -40,7 +40,7 @@ export type CreateEquipmentInput = {
   accessories?: string | null
   condition_in?: string | null
   additional_observations?: string | null
-  is_priority?: boolean
+  priority_level?: number
 }
 export type UpdateStatusInput = z.infer<typeof updateStatusSchema>
 export type ForceStatusInput = z.infer<typeof forceStatusSchema>

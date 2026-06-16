@@ -56,7 +56,12 @@ export async function PUT(
     
     if (body.service_type !== undefined) updateData.service_type = body.service_type
     if (body.date_in !== undefined) updateData.date_in = body.date_in
-    if (body.is_priority !== undefined) updateData.is_priority = body.is_priority
+    if (body.priority_level !== undefined) {
+      updateData.priority_level = body.priority_level
+      updateData.is_priority = body.priority_level > 0
+    } else if (body.is_priority !== undefined) {
+      updateData.is_priority = body.is_priority
+    }
 
     // Timestamps operativos (solo superadmin puede enviarlos)
     if (body.start_diagnosis_at !== undefined) updateData.start_diagnosis_at = body.start_diagnosis_at

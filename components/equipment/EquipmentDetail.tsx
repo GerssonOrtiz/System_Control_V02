@@ -9,6 +9,7 @@ import { useUser } from '@/hooks/useUser'
 import StatusBadge from './StatusBadge'
 import StatusChangeModal from './StatusChangeModal'
 import ClientSelector from './ClientSelector'
+import BrandSelector from './BrandSelector'
 
 interface EquipmentDetailProps {
   isOpen: boolean
@@ -30,7 +31,7 @@ export default function EquipmentDetail({
   const [isSaving, setIsSaving] = useState(false)
 
   // Edit fields state
-  const [editIsPriority, setEditIsPriority] = useState(false)
+  const [editPriorityLevel, setEditPriorityLevel] = useState(0)
   const [editFr, setEditFr] = useState('')
   const [editClientName, setEditClientName] = useState('')
   const [editBrand, setEditBrand] = useState('')
@@ -98,7 +99,7 @@ export default function EquipmentDetail({
     setEditSerial(equipment.serial_number || '')
     setEditReportNumber(equipment.report_number || '')
     setEditServiceType(equipment.service_type || 'REVISION_GENERAL')
-    setEditIsPriority(equipment.is_priority || false)
+    setEditPriorityLevel(equipment.priority_level || (equipment.is_priority ? 1 : 0))
     if (equipment.date_in) {
       try {
         const d = new Date(equipment.date_in)
@@ -142,7 +143,8 @@ export default function EquipmentDetail({
           serial_number: editSerial,
           report_number: editReportNumber,
           service_type: editServiceType,
-          is_priority: editIsPriority,
+          priority_level: editPriorityLevel,
+          is_priority: editPriorityLevel > 0,
           date_in: editDateIn ? new Date(editDateIn).toISOString() : undefined,
           client_report: editClientReport,
           accessories: editAccessories,
@@ -185,9 +187,9 @@ export default function EquipmentDetail({
             <Dialog.Title className="text-xl font-bold text-neon-blue mb-6 flex justify-between items-center border-b border-border-subtle pb-3">
               <span>📋 Ficha Detallada: {equipment?.fr_number || 'Cargando...'}</span>
               <div className="flex items-center gap-2">
-                {equipment?.is_priority && (
+                {(equipment?.priority_level || (equipment?.is_priority ? 1 : 0)) > 0 && (
                   <span className="bg-neon-purple/20 border border-neon-purple/50 text-neon-purple text-[10px] font-bold px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(157,78,221,0.3)] animate-pulse">
-                    ⭐ PRIORIDAD VIP
+                    {Array((equipment?.priority_level || 1)).fill('⭐').join('')} VIP {equipment?.priority_level || 1}
                   </span>
                 )}
                 <button
@@ -266,16 +268,16 @@ export default function EquipmentDetail({
                             onChange={(e) => setEditFr(e.target.value)}
                             className="flex-1 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none font-mono text-text-primary"
                           />
-                          <div className="flex items-center gap-1.5 bg-neon-purple/10 border border-neon-purple/20 px-2 py-1 rounded">
-                            <input
-                              type="checkbox"
-                              id="edit-priority"
-                              checked={editIsPriority}
-                              onChange={(e) => setEditIsPriority(e.target.checked)}
-                              className="w-3 h-3 text-neon-purple bg-bg-base border-border-subtle rounded focus:ring-neon-purple"
-                            />
-                            <label htmlFor="edit-priority" className="text-[10px] font-bold text-neon-purple uppercase cursor-pointer">VIP</label>
-                          </div>
+                          <select
+                            value={editPriorityLevel}
+                            onChange={(e) => setEditPriorityLevel(parseInt(e.target.value))}
+                            className="bg-neon-purple/10 border border-neon-purple/20 text-neon-purple text-[10px] font-bold px-2 py-1.5 rounded focus:outline-none"
+                          >
+                            <option value={0}>Regular</option>
+                            <option value={1}>⭐ VIP 1</option>
+                            <option value={2}>⭐⭐ VIP 2</option>
+                            <option value={3}>⭐⭐⭐ VIP 3</option>
+                          </select>
                         </div>
                       ) : (
                         <span className="col-span-2 font-mono font-bold text-neon-blue uppercase">{equipment.fr_number}</span>
@@ -310,12 +312,12 @@ export default function EquipmentDetail({
 
                       <span className="text-text-secondary font-semibold uppercase">Marca:</span>
                       {isEditing ? (
-                        <input
-                          type="text"
-                          value={editBrand}
-                          onChange={(e) => setEditBrand(e.target.value)}
-                          className="col-span-2 bg-bg-base border border-border-subtle rounded px-2.5 py-1.5 text-xs focus:border-neon-blue focus:outline-none text-text-primary"
-                        />
+                        <div className="col-span-2">
+                          <BrandSelector
+                            value={editBrand}
+                            onChange={(val) => setEditBrand(val)}
+                          />
+                        </div>
                       ) : (
                         <span className="col-span-2 font-medium">{equipment.brand}</span>
                       )}

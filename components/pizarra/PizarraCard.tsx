@@ -16,18 +16,33 @@ interface PizarraCardProps {
     maintenance_tech_username?: string | null
     status_color?: string
     assigned_technicians?: string[] | null
-    is_priority?: boolean
+    priority_level?: number
+    is_priority?: boolean // Maintain compatibility
   }
 }
 
 export default function PizarraCard({ equipment }: PizarraCardProps) {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
 
+  const priorityLevel = equipment.priority_level || (equipment.is_priority ? 1 : 0)
+  const isPriority = priorityLevel > 0
+
   const cardClasses = `bg-bg-surface/60 border rounded-lg px-3 py-2 flex items-center gap-3 transition-all duration-150 group cursor-pointer shadow-sm mb-1.5 ${
-    equipment.is_priority 
-      ? 'border-neon-purple shadow-[0_0_10px_rgba(157,78,221,0.2)] hover:bg-neon-purple/5' 
+    priorityLevel === 3
+      ? 'border-neon-purple shadow-[0_0_15px_rgba(157,78,221,0.4)] hover:bg-neon-purple/10 animate-glow-pulse' 
+      : priorityLevel === 2
+      ? 'border-neon-purple/70 shadow-[0_0_10px_rgba(157,78,221,0.2)] hover:bg-neon-purple/5'
+      : priorityLevel === 1
+      ? 'border-neon-purple/40 hover:bg-neon-purple/5'
       : 'border-border-subtle hover:bg-bg-surface hover:border-neon-blue/40'
   }`
+
+  const priorityStars = () => {
+    if (priorityLevel === 1) return '⭐'
+    if (priorityLevel === 2) return '⭐⭐'
+    if (priorityLevel === 3) return '⭐⭐⭐'
+    return null
+  }
 
   return (
     <>
@@ -47,8 +62,10 @@ export default function PizarraCard({ equipment }: PizarraCardProps) {
             <span className="font-mono text-sm font-bold text-neon-blue uppercase tracking-wider">
               {equipment.fr_number.replace('FR-', '')}
             </span>
-            {equipment.is_priority && (
-              <span className="text-[8px] font-black text-neon-purple animate-pulse leading-none mt-0.5">⭐ PRIORIDAD</span>
+            {isPriority && (
+              <span className={`text-[8px] font-black text-neon-purple leading-none mt-0.5 ${priorityLevel === 3 ? 'animate-pulse' : ''}`}>
+                {priorityStars()} VIP {priorityLevel}
+              </span>
             )}
           </div>
           

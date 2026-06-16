@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { createEquipmentSchema } from '@/lib/validations/equipment.schema'
+import { mailer } from '@/lib/mail/mailer'
 
 export async function POST(request: NextRequest) {
   try {
@@ -106,7 +107,8 @@ export async function POST(request: NextRequest) {
         additional_observations,
         current_status_id: activeInitialState.id,
         created_by: session.user.id,
-        is_priority: data.is_priority || false,
+        priority_level: data.priority_level || 0,
+        is_priority: (data.priority_level || 0) > 0,
       } as any)
       .select('id')
       .single()
@@ -120,6 +122,24 @@ export async function POST(request: NextRequest) {
     }
 
     const activeEquipment = newEquipment as any
+
+    // 9. Enviar Notificación Interna (Email)
+    try {
+      // No bloqueamos el retorno de la API si el correo falla, pero lo intentamos
+      mailer.sendEquipmentEntry({
+        fr_number,
+        client_name,
+        brand,
+        model,
+        serial_number,
+        service_type: data.service_type,
+        client_report: client_report || 'SIN REPORTE',
+        accessories: accessories || 'NINGUNO',
+        is_priority: (data.priority_level || 0) > 0
+      })
+    } catch (mailErr) {
+      console.error('[POST /api/equipment/create] Background mailer error:', mailErr)
+    }
 
     return NextResponse.json({
       success: true,

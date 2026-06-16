@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { updateStatusSchema } from '@/lib/validations/equipment.schema'
 import { WorkflowEngine } from '@/lib/workflow/engine'
+import { mailer } from '@/lib/mail/mailer'
 
 export async function POST(
   request: NextRequest,
@@ -123,6 +124,40 @@ export async function POST(
     if (updateError) {
       console.error('[POST update-status] Database update error:', updateError)
       return NextResponse.json({ success: false, error: 'Ocurrió un error al actualizar el estado del equipo en la base de datos' }, { status: 500 })
+    }
+
+    // 10. Enviar Notificaciones Internas (Email) según estado
+    try {
+      // Necesitamos los datos del equipo para el correo
+      const { data: eqFull } = await supabase
+        .from('equipment_records')
+        .select('fr_number, client_name, brand, model')
+        .eq('id', equipmentId)
+        .single()
+
+      if (eqFull) {
+        const full = eqFull as any
+        const statusName = activeTargetState.name.trim().toLowerCase()
+
+        if (statusName === 'aprobado') {
+          mailer.sendEquipmentApproved({
+            fr_number: full.fr_number,
+            client_name: full.client_name,
+            brand: full.brand,
+            model: full.model
+          })
+        } else if (statusName.includes('repuesto')) {
+          mailer.sendPartsRequest({
+            fr_number: full.fr_number,
+            client_name: full.client_name,
+            brand: full.brand,
+            model: full.model,
+            status: activeTargetState.name
+          })
+        }
+      }
+    } catch (mailErr) {
+      console.error('[POST update-status] Background mailer error:', mailErr)
     }
 
     return NextResponse.json({

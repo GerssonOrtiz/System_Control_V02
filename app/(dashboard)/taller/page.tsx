@@ -43,21 +43,44 @@ export default function TallerPage() {
 
   const renderCard = (eq: any) => {
     const isDelayed = eq.days_elapsed > 5
+    const priorityLevel = eq.priority_level || (eq.is_priority ? 1 : 0)
+    const isPriority = priorityLevel > 0
+
+    const priorityStars = () => {
+      if (priorityLevel === 1) return '⭐'
+      if (priorityLevel === 2) return '⭐⭐'
+      if (priorityLevel === 3) return '⭐⭐⭐'
+      return null
+    }
+
     return (
       <div
         key={eq.id}
         onClick={() => handleOpenDetail(eq)}
         className={`bg-bg-surface border rounded-xl p-4 cursor-pointer hover:-translate-y-0.5 transition-all space-y-3 relative group ${
-          isDelayed
+          priorityLevel === 3
+            ? 'border-neon-purple shadow-[0_0_15px_rgba(157,78,221,0.3)] bg-neon-purple/[0.03] animate-glow-pulse'
+            : priorityLevel === 2
+            ? 'border-neon-purple/60 bg-neon-purple/[0.02]'
+            : priorityLevel === 1
+            ? 'border-neon-purple/30 bg-neon-purple/[0.01]'
+            : isDelayed
             ? 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.1)] hover:border-red-500/80'
             : 'border-border-subtle hover:border-neon-blue/40'
         }`}
       >
         {/* Header */}
         <div className="flex justify-between items-start">
-          <span className="font-mono text-sm font-bold text-neon-blue uppercase tracking-wider">
-            {eq.fr_number}
-          </span>
+          <div className="flex flex-col">
+            <span className={`font-mono text-sm font-bold uppercase tracking-wider ${isPriority ? 'text-neon-purple' : 'text-neon-blue'}`}>
+              {eq.fr_number}
+            </span>
+            {isPriority && (
+              <span className="text-[9px] font-black text-neon-purple uppercase mt-0.5">
+                {priorityStars()} VIP {priorityLevel}
+              </span>
+            )}
+          </div>
           <StatusBadge status={eq.status_name} color={eq.status_color} />
         </div>
 
@@ -82,13 +105,7 @@ export default function TallerPage() {
         {/* Footer */}
         <div className="flex justify-between items-center pt-2 border-t border-border-subtle/50 text-[10px]">
           <div>
-            {isDelayed ? (
-              <span className="text-red-500 font-bold flex items-center gap-1 animate-pulse">
-                ⚠️ ATRASADO ({eq.days_elapsed} días)
-              </span>
-            ) : (
-              <span className="text-text-secondary">{eq.days_elapsed} días transcurridos</span>
-            )}
+            <span className="text-text-secondary">{eq.days_elapsed} días transcurridos</span>
           </div>
 
           <button

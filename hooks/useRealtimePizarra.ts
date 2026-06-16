@@ -17,7 +17,7 @@ export function useRealtimePizarra(onTriggerRefetch?: () => void) {
           .from('equipment_with_status')
           .select('*')
           .eq('is_terminal', false)
-          .order('is_priority', { ascending: false })
+          .order('priority_level', { ascending: false })
           .order('fr_number', { ascending: false })
 
         if (error) {
@@ -122,10 +122,13 @@ export function useRealtimePizarra(onTriggerRefetch?: () => void) {
     }
   }, [onTriggerRefetch])
 
-  // Ordenar equipos: Prioridad primero, luego FR descendente
+  // Ordenar equipos: Prioridad primero (VIP 3 > VIP 2 > VIP 1 > Regular), luego FR descendente
   const sortedEquipments = [...equipments].sort((a, b) => {
-    if (a.is_priority !== b.is_priority) {
-      return a.is_priority ? -1 : 1
+    const aPrio = a.priority_level || (a.is_priority ? 1 : 0)
+    const bPrio = b.priority_level || (b.is_priority ? 1 : 0)
+    
+    if (aPrio !== bPrio) {
+      return bPrio - aPrio
     }
     return (b.fr_number || '').localeCompare(a.fr_number || '', undefined, { numeric: true, sensitivity: 'base' })
   })

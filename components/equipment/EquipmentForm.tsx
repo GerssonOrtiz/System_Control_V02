@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { createEquipmentSchema, CreateEquipmentInput } from '@/lib/validations/equipment.schema'
 import ClientSelector from './ClientSelector'
+import BrandSelector from './BrandSelector'
 
 interface EquipmentFormProps {
   onSuccess?: () => void
@@ -35,7 +36,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
       accessories: '',
       condition_in: '',
       additional_observations: '',
-      is_priority: false,
+      priority_level: 0,
     },
   })
 
@@ -80,16 +81,16 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
               Ficha de Recepción (FR) *
             </label>
-            <div className="flex items-center gap-2 px-2 py-1 bg-neon-purple/5 border border-neon-purple/20 rounded-md">
-              <input
-                type="checkbox"
-                id="is_priority"
-                {...register('is_priority')}
-                className="w-3.5 h-3.5 text-neon-purple bg-bg-base border-border-subtle rounded focus:ring-neon-purple"
-              />
-              <label htmlFor="is_priority" className="text-[10px] font-bold text-neon-purple uppercase cursor-pointer">
-                ⭐ Prioridad VIP
-              </label>
+            <div className="flex items-center gap-2">
+              <select
+                {...register('priority_level', { valueAsNumber: true })}
+                className="text-[10px] font-bold bg-neon-purple/5 border border-neon-purple/20 rounded-md px-2 py-1 text-neon-purple uppercase outline-none focus:border-neon-purple transition-all cursor-pointer"
+              >
+                <option value={0}>Regular</option>
+                <option value={1}>⭐ VIP 1</option>
+                <option value={2}>⭐⭐ VIP 2</option>
+                <option value={3}>⭐⭐⭐ VIP 3</option>
+              </select>
             </div>
           </div>
           <input
@@ -144,27 +145,18 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
 
         {/* Marca */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Marca
-          </label>
-          <input
-            type="text"
-            list="brands-list"
-            {...register('brand')}
-            placeholder="ej: ESAB o escribe otra"
-            className={`w-full bg-bg-base/50 border ${
-              errors.brand ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
-            } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
-            autoComplete="off"
+          <Controller
+            name="brand"
+            control={control}
+            render={({ field }) => (
+              <BrandSelector
+                value={field.value || ''}
+                onChange={field.onChange}
+                error={errors.brand?.message}
+                label="Marca"
+              />
+            )}
           />
-          <datalist id="brands-list">
-            {BRANDS.map(b => (
-              <option key={b} value={b} />
-            ))}
-          </datalist>
-          {errors.brand && (
-            <p className="text-red-400 text-xs mt-1">{errors.brand.message}</p>
-          )}
         </div>
 
         {/* Modelo */}
