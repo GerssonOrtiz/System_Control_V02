@@ -189,7 +189,7 @@ export default function StatusChangeModal({
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Estado Actual */}
-            <div className="flex justify-between items-center bg-bg-base/50 p-3 rounded-lg border border-border-subtle">
+            <div className="flex justify-between items-center bg-bg-elevated p-3 rounded-lg border border-border-subtle">
               <span className="text-xs font-semibold text-text-secondary uppercase">Estado Actual</span>
               <StatusBadge status={currentStatusName} color={currentStatusColor} />
             </div>
@@ -223,7 +223,7 @@ export default function StatusChangeModal({
                 value={targetStatusId}
                 onChange={(e) => setTargetStatusId(e.target.value)}
                 required
-                className="w-full bg-bg-base/50 border border-border-subtle rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all"
+                className="w-full bg-bg-elevated border border-border-subtle rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all"
               >
                 <option value="" disabled>Seleccione un estado...</option>
                 {isOverride
@@ -254,7 +254,7 @@ export default function StatusChangeModal({
                   onChange={(e) => setReportNumber(e.target.value)}
                   placeholder="Ej: INF-001"
                   required
-                  className="w-full bg-bg-base/50 border border-neon-blue/50 rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all uppercase font-mono"
+                  className="w-full bg-bg-elevated border border-neon-blue/50 rounded-lg px-3 py-2.5 text-sm text-text-primary focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all uppercase font-mono"
                 />
               </div>
             )}
@@ -279,7 +279,7 @@ export default function StatusChangeModal({
                           className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${
                             isSelected 
                               ? 'bg-neon-blue/20 border-neon-blue text-neon-blue shadow-[0_0_10px_rgba(0,229,255,0.2)]' 
-                              : 'bg-bg-base/50 border-border-subtle text-text-muted hover:border-white/20'
+                              : 'bg-bg-elevated border-border-subtle text-text-muted hover:border-white/20'
                           }`}
                         >
                           {t.username.toUpperCase()}
@@ -305,7 +305,7 @@ export default function StatusChangeModal({
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Escriba aquí observaciones sobre este cambio de estado..."
                   rows={3}
-                  className="w-full bg-bg-base/50 border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all resize-none"
+                  className="w-full bg-bg-elevated border border-border-subtle rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all resize-none"
                 />
               </div>
             ) : (
@@ -319,7 +319,7 @@ export default function StatusChangeModal({
                   placeholder="Debe ingresar la justificación para forzar este estado..."
                   required
                   rows={3}
-                  className="w-full bg-bg-base/50 border border-neon-purple/50 rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-neon-purple focus:shadow-[0_0_8px_rgba(157,78,221,0.2)] focus:outline-none transition-all resize-none"
+                  className="w-full bg-bg-elevated border border-neon-purple/50 rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-neon-purple focus:shadow-[0_0_8px_rgba(157,78,221,0.2)] focus:outline-none transition-all resize-none"
                 />
               </div>
             )}

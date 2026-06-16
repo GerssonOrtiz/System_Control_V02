@@ -91,7 +91,26 @@ export async function POST(request: NextRequest) {
 
     const activeInitialState = initialState as any
 
-    // 8. Registrar equipo en la base de datos
+    // 8. Registrar marca en el catálogo si no existe
+    if (brand !== 'S/M') {
+      try {
+        const { data: existingBrand } = await supabase
+          .from('catalog_brands')
+          .select('id')
+          .eq('name', brand)
+          .maybeSingle()
+
+        if (!existingBrand) {
+          await supabase
+            .from('catalog_brands')
+            .insert({ name: brand })
+        }
+      } catch (brandErr) {
+        console.error('[POST /api/equipment/create] error updating catalog_brands:', brandErr)
+      }
+    }
+
+    // 9. Registrar equipo en la base de datos
     const { data: newEquipment, error: insertError } = await supabase
       .from('equipment_records')
       .insert({
@@ -123,7 +142,7 @@ export async function POST(request: NextRequest) {
 
     const activeEquipment = newEquipment as any
 
-    // 9. Enviar Notificación Interna (Email)
+    // 10. Enviar Notificación Interna (Email)
     try {
       // No bloqueamos el retorno de la API si el correo falla, pero lo intentamos
       mailer.sendEquipmentEntry({

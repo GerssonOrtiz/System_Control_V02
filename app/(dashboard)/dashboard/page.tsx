@@ -144,7 +144,7 @@ export default function DashboardPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar FR, cliente..."
-                className="w-full bg-bg-base/60 border border-border-subtle rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+                className="w-full bg-bg-elevated border border-border-subtle rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
               />
               {isSearching && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neon-blue animate-pulse font-mono">...</span>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setActivePage(0); }}
-                className="flex-1 sm:flex-none bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+                className="flex-1 sm:flex-none bg-bg-elevated border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
               >
                 <option value="">Todos los Estados</option>
                 {statusOptions.map((opt: any) => (
@@ -166,7 +166,7 @@ export default function DashboardPage() {
               <select
                 value={serviceFilter}
                 onChange={(e) => { setServiceFilter(e.target.value); setActivePage(0); }}
-                className="flex-1 sm:flex-none bg-bg-base/60 border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+                className="flex-1 sm:flex-none bg-bg-elevated border border-border-subtle rounded-lg px-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
               >
                 <option value="">Todos los Servicios</option>
                 {serviceOptions.map((opt: any) => (

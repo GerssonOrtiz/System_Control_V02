@@ -86,7 +86,7 @@ export default function BrandSelector({ value, onChange, error, label }: BrandSe
           onChange={handleSearchChange}
           onFocus={() => setIsOpen(true)}
           placeholder="Escriba o seleccione una marca..."
-          className={`w-full bg-bg-base/50 border ${
+          className={`w-full bg-bg-elevated border ${
             error ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
           } rounded-lg pl-10 pr-3.5 py-2.5 text-sm focus:outline-none transition-all`}
           autoComplete="off"

@@ -84,7 +84,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             <div className="flex items-center gap-2">
               <select
                 {...register('priority_level', { valueAsNumber: true })}
-                className="text-[10px] font-bold bg-neon-purple/5 border border-neon-purple/20 rounded-md px-2 py-1 text-neon-purple uppercase outline-none focus:border-neon-purple transition-all cursor-pointer"
+                className="text-[10px] font-bold bg-bg-elevated border border-neon-purple/20 rounded-md px-2 py-1 text-neon-purple uppercase outline-none focus:border-neon-purple transition-all cursor-pointer"
               >
                 <option value={0}>Regular</option>
                 <option value={1}>⭐ VIP 1</option>
@@ -97,7 +97,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             type="text"
             {...register('fr_number')}
             placeholder="ej: 1199-1"
-            className={`w-full bg-bg-base/50 border ${
+            className={`w-full bg-bg-elevated border ${
               errors.fr_number ? 'border-red-500/50 focus:shadow-[0_0_8px_rgba(239,68,68,0.2)]' : 'border-border-subtle focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)]'
             } rounded-lg px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none transition-all font-mono`}
             autoComplete="off"
@@ -130,7 +130,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
           </label>
           <select
             {...register('service_type')}
-            className={`w-full bg-bg-base/50 border ${
+            className={`w-full bg-bg-elevated border ${
               errors.service_type ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
           >
@@ -168,7 +168,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             type="text"
             {...register('model')}
             placeholder="ej: XMT 350 (opcional)"
-            className={`w-full bg-bg-base/50 border ${
+            className={`w-full bg-bg-elevated border ${
               errors.model ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
             autoComplete="off"
@@ -187,7 +187,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             type="text"
             {...register('serial_number')}
             placeholder="ej: SN-123456 (opcional)"
-            className={`w-full bg-bg-base/50 border ${
+            className={`w-full bg-bg-elevated border ${
               errors.serial_number ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
             } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all font-mono`}
             autoComplete="off"
@@ -208,7 +208,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             {...register('client_report')}
             placeholder="ej: NO ENCIENDE AL PRIMER INTENTO"
             rows={3}
-            className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            className="w-full bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
             autoComplete="off"
           />
         </div>
@@ -222,7 +222,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             {...register('accessories')}
             placeholder="ej: CABLE DE TIERRA, CARETA"
             rows={3}
-            className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            className="w-full bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
             autoComplete="off"
           />
         </div>
@@ -236,7 +236,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             {...register('condition_in')}
             placeholder="ej: GOLPE EN PANEL LATERAL"
             rows={3}
-            className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            className="w-full bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
             autoComplete="off"
           />
         </div>
@@ -250,7 +250,7 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
             {...register('additional_observations')}
             placeholder="ej: CLIENTE INDICA QUE EL PROBLEMA ES RECIENTE"
             rows={3}
-            className="w-full bg-bg-base/50 border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
+            className="w-full bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg px-3.5 py-2 text-sm focus:outline-none transition-all resize-none"
             autoComplete="off"
           />
         </div>
