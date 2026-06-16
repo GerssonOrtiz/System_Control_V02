@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 // Configuración de destinatarios para fase de pruebas
 const RECIPIENTS = [
@@ -36,6 +36,11 @@ export const mailer = {
     const dateStr = data.date_in 
       ? new Date(data.date_in).toLocaleDateString('es-PE') 
       : new Date().toLocaleDateString('es-PE')
+
+    if (!resend) {
+      console.warn('[Mailer] Skip sending email: RESEND_API_KEY not configured')
+      return
+    }
 
     try {
       await resend.emails.send({
@@ -128,6 +133,11 @@ export const mailer = {
     brand: string
     model: string
   }) {
+    if (!resend) {
+      console.warn('[Mailer] Skip sending email: RESEND_API_KEY not configured')
+      return
+    }
+
     try {
       await resend.emails.send({
         from: 'CABELAB System <onboarding@resend.dev>',
@@ -164,6 +174,11 @@ export const mailer = {
     model: string
     status: string
   }) {
+    if (!resend) {
+      console.warn('[Mailer] Skip sending email: RESEND_API_KEY not configured')
+      return
+    }
+
     try {
       await resend.emails.send({
         from: 'CABELAB System <onboarding@resend.dev>',
