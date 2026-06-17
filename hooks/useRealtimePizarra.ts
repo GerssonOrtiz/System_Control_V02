@@ -17,7 +17,6 @@ export function useRealtimePizarra(onTriggerRefetch?: () => void) {
           .from('equipment_with_status')
           .select('*')
           .eq('is_terminal', false)
-          .order('priority_level', { ascending: false })
           .order('fr_number', { ascending: false })
 
         if (error) {

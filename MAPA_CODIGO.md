@@ -1,28 +1,29 @@
 # MAPA DEL CÓDIGO — CABELAB v2.0
 > Guía de navegación técnica actualizada tras la implementación de DNA, estadísticas por empresa, controles de Superadmin y el nuevo Selector de Clientes.
-
 ## 1. Directorio Raíz y API
 *   `/app/(auth)`: Gestión de login con correos virtuales `@cabelab.local`.
-*   `/app/api/clients`: **[NUEVO]** Endpoint para obtener nombres únicos de clientes.
-*   `/app/api/equipment/[id]/update`: Endpoint maestro de actualización. Permite a Superadmins editar todos los campos, incluyendo timestamps operativos.
+*   `/app/api/clients`: Endpoint para obtener nombres únicos de clientes.
+*   `/app/api/catalog/brands`: **[NUEVO]** Endpoint para obtener marcas del catálogo maestro.
+*   `/app/api/equipment/[id]/update`: Endpoint maestro de actualización. Permite a Superadmins editar todos los campos, incluyendo timestamps operativos y niveles VIP.
 *   `/app/api/equipment/serial/[serial]`: API para el módulo DNA. Recupera el historial clínico completo de una máquina por su número de serie único.
-*   `/app/api/stats`: Endpoint de analíticas globales, con agregación por empresa (marcas, modelos y entradas recientes).
-*   `/app/admin/catalog`: Interfaz maestra de gestión del Catálogo Técnico (Repuestos/Marcas/Modelos).
 
 ## 2. Componentes de UI (`/components`)
 *   `admin/BrandModelManager.tsx`: Gestión normalizada de Marcas y Modelos.
 *   `admin/PartManager.tsx`: Editor de repuestos con selector de compatibilidad múltiple.
-*   `equipment/ClientSelector.tsx`: **[NUEVO]** Componente de búsqueda y registro de clientes con UI neón e integración con react-hook-form.
-*   `equipment/EquipmentDetail.tsx`: Ficha detallada con inputs de fecha/hora para Superadmin y enlace directo al DNA del equipo.
-*   `equipment/EquipmentForm.tsx`: Formulario de registro (integra `ClientSelector`).
-*   `equipment/EquipmentTable.tsx`: Lista general optimizada (columna 'Días' removida para limpieza visual).
-*   `pizarra/PizarraBoard.tsx`: Tablero Realtime con la pestaña plegable horizontal de **Coordinación con el cliente**.
-*   `pizarra/PizarraCard.tsx`: Tarjetas compactas con indicadores de prioridad VIP.
-*   `dashboard/DashboardPage.tsx`: Panel principal con buscador global y métricas rápidas (sin tabla de equipos críticos).
+*   `equipment/ClientSelector.tsx`: Componente de búsqueda y registro de clientes con UI sólida.
+*   `equipment/BrandSelector.tsx`: **[NUEVO]** Componente para selección y registro automático de marcas en el catálogo.
+*   `equipment/EquipmentDetail.tsx`: Ficha detallada con selector de **Niveles VIP (1-3)** y edición de timestamps.
+*   `equipment/EquipmentForm.tsx`: Formulario de registro (integra `ClientSelector`, `BrandSelector` y Selector VIP).
+*   `equipment/EquipmentTable.tsx`: Lista general optimizada con indicadores de prioridad multinivel.
+*   `pizarra/PizarraBoard.tsx`: Tablero Realtime con ordenamiento dinámico por nivel de prioridad.
+*   `pizarra/PizarraCard.tsx`: Tarjetas compactas con estrellas VIP y efectos visuales de urgencia.
 
 ## 3. Lógica y Validación (`/lib`)
-*   `permissions.ts`: Define las reglas de acceso, permitiendo al Superadmin realizar overrides y ediciones críticas.
-*   `validations/equipment.schema.ts`: Esquemas Zod para integridad de datos.
+...
+## 5. Base de Datos y Vistas
+*   `supabase/migrations`: Historial de cambios en el esquema de la base de datos (001 al 011).
+*   `011_vip_priorities.sql`: Migración que implementa la columna `priority_level` y actualiza la vista `equipment_with_status`.
+*   `equipment_with_status`: Vista central que expone todos los metadatos operativos, incluyendo el nuevo `priority_level`.
 
 ## 4. Hooks y Estado (`/hooks`)
 *   `useRealtimePizarra.ts`: Hook central para sincronización vía WebSockets y agrupamiento por estados.
