@@ -123,15 +123,15 @@ export default function PizarraBoard() {
                   key={col.id}
                   className={`flex flex-col border transition-all duration-500 ease-in-out shadow-2xl rounded-xl ${
                     isCoordinationOpen 
-                      ? 'min-w-[300px] flex-1 bg-bg-surface/60 backdrop-blur-md border-indigo-500/50' 
-                      : 'w-max h-10 bg-indigo-500/10 border-indigo-500/30 absolute right-4 bottom-4 z-20 backdrop-blur-sm'
+                      ? 'min-w-[300px] flex-1 bg-bg-elevated border-indigo-500/50' 
+                      : 'w-max h-10 bg-bg-elevated border-indigo-500/30 absolute right-4 bottom-4 z-20'
                   }`}
                 >
                   <button
                     onClick={() => setIsCoordinationOpen(!isCoordinationOpen)}
                     className={`flex items-center gap-3 outline-none group transition-all ${
                       !isCoordinationOpen 
-                        ? 'px-4 h-full hover:bg-indigo-500/20' 
+                        ? 'px-4 h-full hover:bg-white/5' 
                         : 'p-3 border-b border-border-subtle/60'
                     }`}
                   >
