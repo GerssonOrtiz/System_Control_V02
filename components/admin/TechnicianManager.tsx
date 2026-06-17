@@ -84,7 +84,7 @@ export default function TechnicianManager() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Nombre del técnico o practicante..."
-          className="flex-1 bg-bg-base border border-border-subtle rounded-lg px-4 py-2 text-sm focus:border-neon-blue outline-none transition-all uppercase"
+          className="flex-1 bg-bg-elevated border border-border-subtle rounded-lg px-4 py-2 text-sm focus:border-neon-blue outline-none transition-all uppercase"
           disabled={isAdding}
         />
         <button
@@ -108,7 +108,7 @@ export default function TechnicianManager() {
               <div 
                 key={t.id} 
                 className={`flex justify-between items-center p-3 rounded-lg border ${
-                  t.is_active ? 'bg-bg-base/40 border-border-subtle' : 'bg-red-500/5 border-red-500/20 opacity-60'
+                  t.is_active ? 'bg-bg-base border-border-subtle' : 'bg-red-500/5 border-red-500/20 opacity-60'
                 }`}
               >
                 <div className="flex flex-col">

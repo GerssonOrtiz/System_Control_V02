@@ -191,7 +191,7 @@ export default function EquiposPage() {
                 setCurrentPage(0)
               }}
               placeholder="Buscar por FR, cliente, marca, modelo, estado..."
-              className="w-full bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:shadow-[0_0_8px_rgba(0,229,255,0.15)] transition-all font-sans"
+              className="w-full bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:shadow-[0_0_8px_rgba(0,229,255,0.15)] transition-all font-sans"
             />
             {isSearching && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neon-blue text-[10px] animate-pulse font-mono">
@@ -207,7 +207,7 @@ export default function EquiposPage() {
                 setStatusFilter(e.target.value)
                 setCurrentPage(0)
               }}
-              className="flex-1 md:w-48 bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg px-3 py-2.5 text-xs text-text-primary focus:outline-none transition-all"
+              className="flex-1 md:w-48 bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg px-3 py-2.5 text-xs text-text-primary focus:outline-none transition-all"
             >
               <option value="">TODOS LOS ESTADOS</option>
               <option value="En espera de diagnóstico">ESPERA DIAGNÓSTICO</option>
@@ -228,7 +228,7 @@ export default function EquiposPage() {
                 setServiceFilter(e.target.value)
                 setCurrentPage(0)
               }}
-              className="flex-1 md:w-48 bg-bg-base border border-border-subtle focus:border-neon-blue rounded-lg px-3 py-2.5 text-xs text-text-primary focus:outline-none transition-all"
+              className="flex-1 md:w-48 bg-bg-elevated border border-border-subtle focus:border-neon-blue rounded-lg px-3 py-2.5 text-xs text-text-primary focus:outline-none transition-all"
             >
               <option value="">TODOS LOS SERVICIOS</option>
               <option value="GARANTIA_CABELAB">GARANTÍA CABELAB</option>

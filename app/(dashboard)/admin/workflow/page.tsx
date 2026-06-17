@@ -277,7 +277,7 @@ export default function AdminWorkflowPage() {
               {states.map((s) => (
                 <div
                   key={s.id}
-                  className="flex items-center gap-3 bg-bg-surface/50 border border-border-subtle rounded-lg p-3 hover:border-neon-blue/30 transition-all"
+                  className="flex items-center gap-3 bg-bg-surface border border-border-subtle rounded-lg p-3 hover:border-neon-blue/30 transition-all"
                 >
                   <div
                     className="w-3 h-8 rounded"
@@ -348,7 +348,7 @@ export default function AdminWorkflowPage() {
                 transitions.map((t) => (
                   <div
                     key={t.id}
-                    className="bg-bg-surface/30 border border-border-subtle rounded-lg p-3 space-y-2"
+                    className="bg-bg-surface border border-border-subtle rounded-lg p-3 space-y-2"
                   >
                     <div className="flex items-center justify-between text-xs font-mono font-bold tracking-wider">
                       <div className="flex items-center gap-1">
@@ -411,7 +411,7 @@ export default function AdminWorkflowPage() {
                   value={stateForm.name}
                   onChange={(e) => setStateForm((p) => ({ ...p, name: e.target.value }))}
                   placeholder="Ej. EN DIAGNÓSTICO"
-                  className="w-full bg-bg-base border border-border-subtle rounded p-2 text-xs text-text-primary uppercase tracking-wide focus:outline-none focus:border-neon-blue"
+                  className="w-full bg-bg-elevated border border-border-subtle rounded p-2 text-xs text-text-primary uppercase tracking-wide focus:outline-none focus:border-neon-blue"
                 />
               </div>
 
@@ -513,7 +513,7 @@ export default function AdminWorkflowPage() {
                   required
                   value={transitionForm.from_state_id}
                   onChange={(e) => setTransitionForm((p) => ({ ...p, from_state_id: e.target.value }))}
-                  className="w-full bg-bg-base border border-border-subtle rounded p-2 text-xs text-text-primary uppercase tracking-wide focus:outline-none focus:border-neon-blue"
+                  className="w-full bg-bg-elevated border border-border-subtle rounded p-2 text-xs text-text-primary uppercase tracking-wide focus:outline-none focus:border-neon-blue"
                 >
                   {states.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -531,7 +531,7 @@ export default function AdminWorkflowPage() {
                   required
                   value={transitionForm.to_state_id}
                   onChange={(e) => setTransitionForm((p) => ({ ...p, to_state_id: e.target.value }))}
-                  className="w-full bg-bg-base border border-border-subtle rounded p-2 text-xs text-text-primary uppercase tracking-wide focus:outline-none focus:border-neon-blue"
+                  className="w-full bg-bg-elevated border border-border-subtle rounded p-2 text-xs text-text-primary uppercase tracking-wide focus:outline-none focus:border-neon-blue"
                 >
                   {states.map((s) => (
                     <option key={s.id} value={s.id}>

@@ -48,7 +48,7 @@ export default function BuscarPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Ingrese Ficha (FR-X), Nombre de cliente, Serie, Marca o Modelo..."
-            className="w-full bg-bg-base/50 border border-border-subtle rounded-lg pl-10 pr-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all"
+            className="w-full bg-bg-elevated border border-border-subtle rounded-lg pl-10 pr-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-neon-blue focus:shadow-[0_0_8px_rgba(0,229,255,0.2)] focus:outline-none transition-all"
           />
         </div>
         {searchTerm.trim().length > 0 && searchTerm.trim().length < 2 && (

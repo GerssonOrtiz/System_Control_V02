@@ -294,7 +294,7 @@ export default function AdminUsuariosPage() {
       ) : (
         <>
           {/* ⏳ PENDIENTES DE APROBACIÓN */}
-          <section className="bg-bg-surface/50 border border-border-subtle rounded-xl p-6">
+          <section className="bg-bg-surface border border-border-subtle rounded-xl p-6">
             <div className="flex items-center gap-3 border-b border-border-subtle pb-3 mb-4">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400">
                 {pendingUsers.length}
@@ -313,7 +313,7 @@ export default function AdminUsuariosPage() {
                 {pendingUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="flex flex-col gap-3 bg-bg-base/70 border border-border-subtle rounded-lg p-4 transition-all hover:border-amber-500/30"
+                    className="flex flex-col gap-3 bg-bg-base border border-border-subtle rounded-lg p-4 transition-all hover:border-amber-500/30"
                   >
                     <div>
                       <div className="text-xs font-bold font-mono tracking-wider text-text-primary">
@@ -331,7 +331,7 @@ export default function AdminUsuariosPage() {
                       <select
                         value={assigningRoles[user.id] || ''}
                         onChange={(e) => handlePendingRoleChange(user.id, e.target.value)}
-                        className="flex-1 bg-bg-surface border border-border-subtle text-[11px] uppercase tracking-wider text-text-primary rounded px-2.5 py-1 focus:outline-none focus:border-neon-blue"
+                        className="flex-1 bg-bg-elevated border border-border-subtle text-[11px] uppercase tracking-wider text-text-primary rounded px-2.5 py-1 focus:outline-none focus:border-neon-blue"
                       >
                         <option value="">-- Seleccionar Rol --</option>
                         {validRoles.map((r) => (
@@ -363,7 +363,7 @@ export default function AdminUsuariosPage() {
           </section>
 
           {/* 👥 USUARIOS DEL SISTEMA (ACTIVOS Y BLOQUEADOS) */}
-          <section className="bg-bg-surface/50 border border-border-subtle rounded-xl p-6">
+          <section className="bg-bg-surface border border-border-subtle rounded-xl p-6">
             <h2 className="text-sm font-bold uppercase tracking-widest text-neon-blue border-b border-border-subtle pb-3 mb-4">
               Usuarios del Sistema
             </h2>
@@ -395,7 +395,7 @@ export default function AdminUsuariosPage() {
                           <select
                             value={user.role}
                             onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
-                            className="bg-bg-base border border-border-subtle text-[10px] uppercase tracking-wider text-text-primary rounded px-2 py-0.5 focus:outline-none focus:border-neon-blue"
+                            className="bg-bg-elevated border border-border-subtle text-[10px] uppercase tracking-wider text-text-primary rounded px-2 py-0.5 focus:outline-none focus:border-neon-blue"
                           >
                             {validRoles.map((r) => (
                               <option key={r} value={r}>
@@ -435,7 +435,7 @@ export default function AdminUsuariosPage() {
 
           {/* 🚫 USUARIOS BLOQUEADOS */}
           {users.some((u) => !u.is_active && u.role !== 'pendiente' && !u.is_superadmin) && (
-            <section className="bg-bg-surface/50 border border-border-subtle rounded-xl p-6">
+            <section className="bg-bg-surface border border-border-subtle rounded-xl p-6">
               <h2 className="text-sm font-bold uppercase tracking-widest text-red-400 border-b border-border-subtle pb-3 mb-4">
                 Usuarios Bloqueados / Inactivos
               </h2>

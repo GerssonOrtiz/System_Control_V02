@@ -259,7 +259,7 @@ export default function EstadisticasPage() {
       </div>
 
       {/* ─── ESTADÍSTICAS POR EMPRESA ─── */}
-      <section className="bg-bg-surface/50 border border-border-subtle rounded-xl p-6 shadow-sm space-y-6">
+      <section className="bg-bg-surface border border-border-subtle rounded-xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border-subtle/30 pb-4">
           <div className="space-y-1">
             <h2 className="text-sm font-bold uppercase tracking-widest text-neon-blue flex items-center gap-2">
@@ -275,15 +275,15 @@ export default function EstadisticasPage() {
               value={companySearch}
               onChange={(e) => setCompanySearch(e.target.value.toUpperCase())}
               placeholder="Buscar empresa..."
-              className="w-full bg-bg-base/60 border border-border-subtle rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
+              className="w-full bg-bg-elevated border border-border-subtle rounded-lg pl-8 pr-3 py-1.5 text-xs text-text-primary focus:border-neon-blue focus:outline-none transition-all"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Lista de Empresas */}
-          <div className="bg-bg-base/30 rounded-xl border border-border-subtle overflow-hidden flex flex-col h-[400px]">
-            <div className="px-4 py-2 bg-bg-surface/50 border-b border-border-subtle text-[10px] font-bold text-text-secondary uppercase">
+          <div className="bg-bg-base rounded-xl border border-border-subtle overflow-hidden flex flex-col h-[400px]">
+            <div className="px-4 py-2 bg-bg-surface border-b border-border-subtle text-[10px] font-bold text-text-secondary uppercase">
               Lista de Clientes
             </div>
             <div className="flex-1 overflow-y-auto scrollbar-thin divide-y divide-border-subtle/30">
@@ -309,7 +309,7 @@ export default function EstadisticasPage() {
           </div>
 
           {/* Detalle Estadístico */}
-          <div className="md:col-span-2 bg-bg-base/20 rounded-xl border border-dashed border-border-subtle/40 p-6 flex flex-col justify-center min-h-[400px]">
+          <div className="md:col-span-2 bg-bg-base rounded-xl border border-dashed border-border-subtle/40 p-6 flex flex-col justify-center min-h-[400px]">
             {!selectedCompany ? (
               <div className="text-center space-y-4 py-12">
                 <div className="text-4xl opacity-20">📊</div>
@@ -338,7 +338,7 @@ export default function EstadisticasPage() {
                       const percentage = Math.round((item.count / company.total) * 100)
                       const statusColor = stats.by_status.find(s => s.status_name === item.status) ?.color || '#6B7280'
                       return (
-                        <div key={item.status} className="bg-bg-surface/50 border border-border-subtle rounded-lg p-4 space-y-2">
+                        <div key={item.status} className="bg-bg-surface border border-border-subtle rounded-lg p-4 space-y-2">
                           <div className="flex justify-between items-center">
                             <span className="text-[10px] font-bold text-text-secondary uppercase flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColor }} />
