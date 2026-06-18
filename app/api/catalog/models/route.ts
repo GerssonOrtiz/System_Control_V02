@@ -13,28 +13,40 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const brand = searchParams.get('brand')
 
-    let query = supabase
+    // 1. Obtener de catalog_models (normalizado)
+    let catalogQuery = supabase
       .from('catalog_models')
       .select('name, catalog_brands!inner(name)')
-      .order('name', { ascending: true })
-
+    
     if (brand) {
-      query = query.eq('catalog_brands.name', brand.toUpperCase())
+      catalogQuery = catalogQuery.eq('catalog_brands.name', brand.toUpperCase())
     }
 
-    const { data, error } = await query
-
-    if (error) {
-      console.error('[GET /api/catalog/models] Database error:', error)
-      return NextResponse.json({ success: false, error: 'Error al obtener modelos' }, { status: 500 })
+    // 2. Obtener de equipment_records (histórico)
+    let recordsQuery = supabase
+      .from('equipment_records')
+      .select('model')
+    
+    if (brand) {
+      recordsQuery = recordsQuery.eq('brand', brand.toUpperCase())
     }
 
-    // Extraer nombres únicos
-    const modelNames = Array.from(new Set(data.map(item => item.name)))
+    const [catalogRes, recordsRes] = await Promise.all([
+      catalogQuery,
+      recordsQuery
+    ])
+
+    const catalogModels = catalogRes.data?.map(item => item.name) || []
+    const recordModels = recordsRes.data?.map(item => item.model) || []
+
+    // Combinar y eliminar duplicados, filtrando valores nulos o 'S/M'
+    const allModels = Array.from(new Set([...catalogModels, ...recordModels]))
+      .filter(model => model && model !== 'S/M')
+      .sort()
 
     return NextResponse.json({
       success: true,
-      data: modelNames
+      data: allModels
     })
 
   } catch (err) {

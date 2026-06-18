@@ -10,21 +10,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const { data, error } = await supabase
+    // 1. Obtener de catalog_brands (normalizado)
+    const { data: catalogData } = await supabase
       .from('catalog_brands')
       .select('name')
-      .order('name', { ascending: true })
 
-    if (error) {
-      console.error('[GET /api/catalog/brands] Database error:', error)
-      return NextResponse.json({ success: false, error: 'Error al obtener marcas' }, { status: 500 })
-    }
+    // 2. Obtener de equipment_records (histórico)
+    const { data: recordsData } = await supabase
+      .from('equipment_records')
+      .select('brand')
 
-    const brandNames = data.map(item => item.name)
+    const catalogBrands = catalogData?.map(item => item.name) || []
+    const recordBrands = recordsData?.map(item => item.brand) || []
+
+    // Combinar y eliminar duplicados, filtrando valores nulos o 'S/M'
+    const allBrands = Array.from(new Set([...catalogBrands, ...recordBrands]))
+      .filter(brand => brand && brand !== 'S/M')
+      .sort()
 
     return NextResponse.json({
       success: true,
-      data: brandNames
+      data: allBrands
     })
 
   } catch (err) {
