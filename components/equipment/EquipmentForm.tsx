@@ -2,12 +2,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { createEquipmentSchema, CreateEquipmentInput } from '@/lib/validations/equipment.schema'
 import ClientSelector from './ClientSelector'
 import BrandSelector from './BrandSelector'
+import ModelSelector from './ModelSelector'
 
 interface EquipmentFormProps {
   onSuccess?: () => void
@@ -38,6 +39,11 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
       additional_observations: '',
       priority_level: 0,
     },
+  })
+
+  const selectedBrand = useWatch({
+    control,
+    name: 'brand',
   })
 
   const BRANDS = ["ESAB", "MILLER", "LINCOLN ELECTRIC", "DAF", "KENDE", "HYPERTHERM"]
@@ -161,21 +167,19 @@ export default function EquipmentForm({ onSuccess, onCancel }: EquipmentFormProp
 
         {/* Modelo */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-            Modelo
-          </label>
-          <input
-            type="text"
-            {...register('model')}
-            placeholder="ej: XMT 350 (opcional)"
-            className={`w-full bg-bg-elevated border ${
-              errors.model ? 'border-red-500/50' : 'border-border-subtle focus:border-neon-blue'
-            } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none transition-all`}
-            autoComplete="off"
+          <Controller
+            name="model"
+            control={control}
+            render={({ field }) => (
+              <ModelSelector
+                value={field.value || ''}
+                onChange={field.onChange}
+                brand={selectedBrand || undefined}
+                error={errors.model?.message}
+                label="Modelo"
+              />
+            )}
           />
-          {errors.model && (
-            <p className="text-red-400 text-xs mt-1">{errors.model.message}</p>
-          )}
         </div>
 
         {/* Número de Serie */}

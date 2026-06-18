@@ -91,9 +91,11 @@ export async function POST(request: NextRequest) {
 
     const activeInitialState = initialState as any
 
-    // 8. Registrar marca en el catálogo si no existe
+    // 8. Registrar marca y modelo en el catálogo si no existen
     if (brand !== 'S/M') {
       try {
+        let brand_id: string | null = null
+
         const { data: existingBrand } = await supabase
           .from('catalog_brands')
           .select('id')
@@ -101,12 +103,36 @@ export async function POST(request: NextRequest) {
           .maybeSingle()
 
         if (!existingBrand) {
-          await supabase
+          const { data: newBrand } = await supabase
             .from('catalog_brands')
             .insert({ name: brand })
+            .select('id')
+            .single()
+          brand_id = (newBrand as any)?.id
+        } else {
+          brand_id = (existingBrand as any).id
         }
-      } catch (brandErr) {
-        console.error('[POST /api/equipment/create] error updating catalog_brands:', brandErr)
+
+        // Si tenemos marca_id y el modelo no es S/M, registrar modelo
+        if (brand_id && model !== 'S/M') {
+          const { data: existingModel } = await supabase
+            .from('catalog_models')
+            .select('id')
+            .eq('brand_id', brand_id)
+            .eq('name', model)
+            .maybeSingle()
+
+          if (!existingModel) {
+            await supabase
+              .from('catalog_models')
+              .insert({ 
+                brand_id, 
+                name: model 
+              })
+          }
+        }
+      } catch (catalogErr) {
+        console.error('[POST /api/equipment/create] error updating catalog (brand/model):', catalogErr)
       }
     }
 

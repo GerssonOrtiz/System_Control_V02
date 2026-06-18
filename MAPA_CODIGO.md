@@ -21,8 +21,9 @@
 ## 3. Lógica y Validación (`/lib`)
 ...
 ## 5. Base de Datos y Vistas
-*   `supabase/migrations`: Historial de cambios en el esquema de la base de datos (001 al 011).
+*   `supabase/migrations`: Historial de cambios en el esquema de la base de datos (001 al 012).
 *   `011_vip_priorities.sql`: Migración que implementa la columna `priority_level` y actualiza la vista `equipment_with_status`.
+*   `012_seed_major_brands.sql`: **[NUEVO]** Seed de marcas principales (ESAB, MILLER, LINCOLN, etc.) para el catálogo automático.
 *   `equipment_with_status`: Vista central que expone todos los metadatos operativos, incluyendo el nuevo `priority_level`.
 
 ## 4. Hooks y Estado (`/hooks`)
